@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: xunwu-project
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://118.24.38.184:3306/xunwu?autoReconnect=true
+    username: root
+    password: sean
