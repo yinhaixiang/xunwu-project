@@ -2,14 +2,20 @@ package com.sean.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
+import java.io.Serializable;
+
+
+@TableName("subway")
 @Data
-@AllArgsConstructor
+@ToString
+@Builder(toBuilder = true)
 @NoArgsConstructor
-public class Subway {
+@AllArgsConstructor
+@EqualsAndHashCode(callSuper = false)
+public class Subway implements Serializable {
 
     @TableId(type = IdType.AUTO)
     private Long id;
@@ -17,4 +23,6 @@ public class Subway {
     private String name;
 
     private String cityEnName;
+
+
 }
