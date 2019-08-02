@@ -4,6 +4,7 @@ import com.sean.base.ApiResponse;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
@@ -19,6 +20,14 @@ public class HomeCtrl {
     @GetMapping("/get")
     @ResponseBody
     public ApiResponse get(Model model) {
+        int a = 1 / 0;
+        return ApiResponse.ofMessage(200, "成功");
+    }
+
+
+    @PostMapping("/post")
+    @ResponseBody
+    public ApiResponse post(Model model) {
         int a = 1 / 0;
         return ApiResponse.ofMessage(200, "成功");
     }
