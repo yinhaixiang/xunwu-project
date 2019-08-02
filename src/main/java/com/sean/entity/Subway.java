@@ -8,13 +8,12 @@ import lombok.*;
 import java.io.Serializable;
 
 
-@TableName("subway")
 @Data
-@ToString
-@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = false)
+@TableName("subway")
 public class Subway implements Serializable {
 
     @TableId(type = IdType.AUTO)
