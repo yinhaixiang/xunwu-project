@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorAttributes;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -15,6 +16,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -24,6 +26,7 @@ import java.util.Map;
  */
 @Controller
 @Slf4j
+@ControllerAdvice
 public class AppErrorController implements ErrorController {
     private static final String ERROR_PATH = "/error";
 
@@ -57,10 +60,11 @@ public class AppErrorController implements ErrorController {
         return "index";
     }
 
+
     /**
      * 除Web页面外的错误处理，比如Json/XML等
      */
-    @RequestMapping
+    @RequestMapping(value = ERROR_PATH)
     @ResponseBody
     @ExceptionHandler(value = {Exception.class})
     public ApiResponse errorApiHandler(HttpServletRequest request, final Exception ex, final WebRequest req) {
@@ -73,12 +77,14 @@ public class AppErrorController implements ErrorController {
         return ApiResponse.ofMessage(status, String.valueOf(attr.getOrDefault("message", "error")));
     }
 
+
     private int getStatus(HttpServletRequest request) {
         Integer status = (Integer) request.getAttribute("javax.servlet.error.status_code");
         if (status != null) {
             return status;
         }
-
         return 500;
     }
+
+
 }
