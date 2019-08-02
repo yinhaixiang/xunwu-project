@@ -16,7 +16,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = false)
-@TableName("subway")
+@TableName("user")
 public class User {
 
     @TableId(type = IdType.AUTO)

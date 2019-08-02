@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = false)
-@TableName("subway")
+@TableName("house_picture")
 public class HousePicture {
 
     @TableId(type = IdType.AUTO)

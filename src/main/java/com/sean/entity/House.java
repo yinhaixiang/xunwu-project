@@ -12,7 +12,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = false)
-@TableName("subway")
+@TableName("house")
 public class House {
 
     @TableId(type = IdType.AUTO)

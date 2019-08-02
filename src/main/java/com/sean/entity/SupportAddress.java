@@ -10,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 @EqualsAndHashCode(callSuper = false)
-@TableName("subway")
+@TableName("support_address")
 public class SupportAddress {
 
     @TableId(type = IdType.AUTO)
