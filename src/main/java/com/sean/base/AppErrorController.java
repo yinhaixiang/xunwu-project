@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Controller
 @Slf4j
-@ControllerAdvice
+//@ControllerAdvice
 public class AppErrorController implements ErrorController {
     private static final String ERROR_PATH = "/error";
 

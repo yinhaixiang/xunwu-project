@@ -13,6 +13,7 @@ public class HomeCtrl {
     @GetMapping(value = {"/", "/index"})
     public String index(Model model) {
         model.addAttribute("name", "sean");
+        int a = 1 / 0;
         return "index";
     }
 
@@ -25,12 +26,7 @@ public class HomeCtrl {
     }
 
 
-    @PostMapping("/post")
-    @ResponseBody
-    public ApiResponse post(Model model) {
-        int a = 1 / 0;
-        return ApiResponse.ofMessage(200, "成功");
-    }
+
 
 
 }
