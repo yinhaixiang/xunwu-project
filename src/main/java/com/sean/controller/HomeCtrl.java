@@ -13,20 +13,29 @@ public class HomeCtrl {
     @GetMapping(value = {"/", "/index"})
     public String index(Model model) {
         model.addAttribute("name", "sean");
-        int a = 1 / 0;
         return "index";
     }
 
 
-    @GetMapping("/get")
-    @ResponseBody
-    public ApiResponse get(Model model) {
-        int a = 1 / 0;
-        return ApiResponse.ofMessage(200, "成功");
+    @GetMapping("/404")
+    public String notFoundPage() {
+        return "404";
     }
 
+    @GetMapping("/403")
+    public String accessError() {
+        return "403";
+    }
 
+    @GetMapping("/500")
+    public String internalError() {
+        return "500";
+    }
 
+    @GetMapping("/logout/page")
+    public String logoutPage() {
+        return "logout";
+    }
 
 
 }

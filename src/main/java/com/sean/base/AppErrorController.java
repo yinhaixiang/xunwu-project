@@ -67,7 +67,7 @@ public class AppErrorController implements ErrorController {
     @RequestMapping(value = ERROR_PATH)
     @ResponseBody
     @ExceptionHandler(value = {Exception.class})
-    public ApiResponse errorApiHandler(HttpServletRequest request, final Exception ex, final WebRequest req) {
+    public ApiResponse errorApiHandler(HttpServletRequest request, Exception ex, WebRequest req) {
 
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         log.info(ex.getMessage() + "------------------" + ex.getStackTrace());
