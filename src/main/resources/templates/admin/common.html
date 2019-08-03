@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html xmlns:th="http://www.thymeleaf.org">
 <!-- 定义需引入的公共资源 start -->
 <head th:fragment="head">
     <meta charset="utf-8">
@@ -51,9 +51,7 @@
                 <ul class="cl">
                     <li class="dropDown dropDown_hover">
                         <a href="#" class="dropDown_A">
-                            <div sec:authentication="name">
-                                用户名
-                            </div>
+                            <div>用户名</div>
 
                             <i class="Hui-iconfont">&#xe6d5;</i></a>
                         <ul class="dropDown-menu menu radius box-shadow">
