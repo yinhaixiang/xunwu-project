@@ -1,6 +1,8 @@
 package com.sean.controller;
 
 import com.sean.base.ApiResponse;
+import com.sean.base.ServiceMultiResult;
+import com.sean.entity.SupportAddress;
 import com.sean.service.IAddressService;
 import com.sean.service.IHouseService;
 import com.sean.service.IUserService;
@@ -38,19 +40,21 @@ public class HouseController {
 //        return ApiResponse.ofSuccess(result.getResult());
 //    }
 //
-//    /**
-//     * 获取支持城市列表
-//     * @return
-//     */
-//    @GetMapping("address/support/cities")
-//    @ResponseBody
-//    public ApiResponse getSupportCities() {
-//        ServiceMultiResult<SupportAddressDTO> result = addressService.findAllCities();
-//        if (result.getResultSize() == 0) {
-//            return ApiResponse.ofStatus(ApiResponse.Status.NOT_FOUND);
-//        }
-//        return ApiResponse.ofSuccess(result.getResult());
-//    }
+
+    /**
+     * 获取支持城市列表
+     *
+     * @return
+     */
+    @GetMapping("address/support/cities")
+    @ResponseBody
+    public ApiResponse getSupportCities() {
+        ServiceMultiResult<SupportAddress> result = addressService.findAllCities();
+        if (result.getResultSize() == 0) {
+            return ApiResponse.ofStatus(ApiResponse.Status.NOT_FOUND);
+        }
+        return ApiResponse.ofSuccess(result.getResult());
+    }
 //
 //    /**
 //     * 获取对应城市支持区域列表

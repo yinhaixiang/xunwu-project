@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Data
@@ -19,8 +20,10 @@ public class SupportAddress {
 
     private String belongTo;
 
+    @JsonProperty(value = "en_name")
     private String enName;
 
+    @JsonProperty(value = "cn_name")
     private String cnName;
 
     private String level;
