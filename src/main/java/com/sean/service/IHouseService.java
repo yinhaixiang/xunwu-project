@@ -1,9 +1,9 @@
 package com.sean.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.sean.entity.User;
+import com.sean.entity.House;
 
-public interface UserService extends IService<User> {
+public interface IHouseService extends IService<House> {
 
 
 }

@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-public class HomeCtrl {
+public class HomeController {
 
     @GetMapping(value = {"/", "/index"})
     public String index(Model model) {

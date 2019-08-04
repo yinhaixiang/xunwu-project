@@ -1,4 +1,4 @@
-package com.sean.controller.admin;
+package com.sean.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -43,6 +43,16 @@ public class AdminController {
     @GetMapping("admin/house/list")
     public String houseListPage() {
         return "admin/house-list";
+    }
+
+
+    /**
+     * 新增房源功能页
+     * @return
+     */
+    @GetMapping("admin/add/house")
+    public String addHousePage() {
+        return "admin/house-add";
     }
 
 
