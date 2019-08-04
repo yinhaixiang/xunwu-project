@@ -4,6 +4,8 @@ target/
 !**/src/main/**
 !**/src/test/**
 
+
+
 ### STS ###
 .apt_generated
 .classpath
@@ -34,3 +36,6 @@ build/
 mvnw
 mvnw.cmd
 .DS_Store
+
+/src/main/resources/static/upload/
+

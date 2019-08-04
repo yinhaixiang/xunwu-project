@@ -1,6 +1,8 @@
 package com.sean.controller;
 
 import com.sean.base.ApiResponse;
+import com.sean.dto.UploadImageDTO;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,14 +11,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
-/**
- * Created by 瓦力.
- */
+
 @Controller
 public class AdminController {
+
+    @Value("${image_upload_dir}")
+    private String imageUploadDir;
 
     /**
      * 后台管理中心
@@ -83,13 +91,14 @@ public class AdminController {
             return ApiResponse.ofStatus(ApiResponse.Status.NOT_VALID_PARAM);
         }
 
-        String fileName = file.getOriginalFilename();
+        BufferedImage image = ImageIO.read(file.getInputStream());
+        int width = image.getWidth();
+        int height = image.getHeight();
+        String newFileName = UUID.randomUUID().toString() + ".jpg";
+        file.transferTo(new File(imageUploadDir + File.separator + newFileName));
 
-        InputStream inputStream = file.getInputStream();
+        return ApiResponse.ofSuccess(new UploadImageDTO(newFileName, width, height));
 
-        System.out.println(inputStream);
-
-        return ApiResponse.ofSuccess(null);
 
     }
 

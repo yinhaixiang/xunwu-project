@@ -548,8 +548,8 @@
             $("#upload-cover-container").append(
                 '<div style="float: left; margin: 2px; padding: 2px; border: 1px dashed; width:' +
                 ' 120px; height: 100px;">' +
-                '<span><img src="http://7xo6gy.com1.z0.glb.clouddn.com/' +
-                photo_path + '?imageView2/1/w/100/h/100" title="待选封面" />' +
+                '<span><img src="http://localhost:8080/static/upload/' +
+                photo_path +
                 '<input style="margin-left: 5px;" type="radio" name="cover" value="' +
                 photo_path + '"/></span></div>'
             );
