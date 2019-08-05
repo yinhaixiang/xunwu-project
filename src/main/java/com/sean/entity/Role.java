@@ -9,7 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
 @TableName("role")
 public class Role {
 

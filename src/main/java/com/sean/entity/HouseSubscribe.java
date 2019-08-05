@@ -11,7 +11,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
 @TableName("house_subscribe")
 public class HouseSubscribe {
 

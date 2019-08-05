@@ -15,7 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
 @TableName("user")
 public class User {
 

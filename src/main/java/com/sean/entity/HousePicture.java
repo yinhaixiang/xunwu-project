@@ -9,7 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
 @TableName("house_picture")
 public class HousePicture {
 

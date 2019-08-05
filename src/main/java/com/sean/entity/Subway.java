@@ -12,7 +12,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@EqualsAndHashCode(callSuper = false)
 @TableName("subway")
 public class Subway implements Serializable {
 

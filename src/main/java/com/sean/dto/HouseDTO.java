@@ -1,29 +1,27 @@
-package com.sean.entity;
+package com.sean.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.sean.entity.HouseDetail;
+import com.sean.entity.HousePicture;
 import lombok.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-@TableName("house")
-public class House {
+public class HouseDTO {
 
-    @TableId(type = IdType.AUTO)
     private Long id;
 
     private String title;
 
-    private Long adminId;
-
     private int price;
 
     private int area;
+
+    private int direction;
 
     private int room;
 
@@ -32,6 +30,10 @@ public class House {
     private int bathroom;
 
     private int floor;
+
+    private Long adminId;
+
+    private String district;
 
     private int totalFloor;
 
@@ -51,12 +53,17 @@ public class House {
 
     private String street;
 
-    private String district;
-
-    private int direction;
-
     private String cover;
 
     private int distanceToSubway;
+
+    private HouseDetail houseDetail;
+
+    private List<String> tags;
+
+    private List<HousePicture> pictures;
+
+    private int subscribeStatus;
+
 
 }
