@@ -97,7 +97,16 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public ServiceResult<SupportAddress> findCity(String cityEnName) {
-        return null;
+        if (cityEnName == null) {
+            return ServiceResult.notFound();
+        }
+
+
+        SupportAddress supportAddress = this.lambdaQuery().eq(SupportAddress::getEnName, cityEnName).eq(SupportAddress::getLevel, SupportAddress.Level.CITY.getValue()).one();
+        if (supportAddress == null) {
+            return ServiceResult.notFound();
+        }
+        return ServiceResult.of(supportAddress);
     }
 
     @Override

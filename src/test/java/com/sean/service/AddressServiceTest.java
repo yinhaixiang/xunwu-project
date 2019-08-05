@@ -81,6 +81,13 @@ public class AddressServiceTest {
 
 
 
+    @Test
+    public void findCity() {
+        ServiceResult<SupportAddress> result = addressService.findCity("bj");
+        System.out.println(result);
+    }
+
+
 
 
 }
