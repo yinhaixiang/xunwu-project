@@ -85,7 +85,14 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public ServiceResult<SubwayStation> findSubwayStation(Long stationId) {
-        return null;
+        if (stationId == null) {
+            return ServiceResult.notFound();
+        }
+        SubwayStation station = subwayStationMapper.selectById(stationId);
+        if (station == null) {
+            return ServiceResult.notFound();
+        }
+        return ServiceResult.of(station);
     }
 
     @Override

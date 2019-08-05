@@ -72,5 +72,15 @@ public class AddressServiceTest {
     }
 
 
+    @Test
+    public void findSubwayStation() {
+        ServiceResult<SubwayStation> result = addressService.findSubwayStation(1L);
+        System.out.println(result);
+    }
+
+
+
+
+
 
 }
