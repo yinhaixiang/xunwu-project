@@ -27,7 +27,7 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public ServiceMultiResult<SupportAddress> findAllCities() {
-        List<SupportAddress> result = this.lambdaQuery().eq(SupportAddress::getLevel, "city").list();
+        List<SupportAddress> result = this.lambdaQuery().eq(SupportAddress::getLevel, SupportAddress.Level.CITY.getValue()).list();
         return new ServiceMultiResult(result.size(), result);
     }
 
