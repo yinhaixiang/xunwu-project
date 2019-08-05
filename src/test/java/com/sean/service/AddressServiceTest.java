@@ -14,6 +14,7 @@ import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -34,6 +35,13 @@ public class AddressServiceTest {
     public void findAllSubwayByCity() {
         String cityEnName = "bj";
         List<Subway> result = addressService.findAllSubwayByCity(cityEnName);
+        System.out.println(result);
+    }
+
+
+    @Test
+    public void findCityAndRegion() {
+        Map<SupportAddress.Level, SupportAddress> result = addressService.findCityAndRegion("bj", "dcq");
         System.out.println(result);
     }
 
