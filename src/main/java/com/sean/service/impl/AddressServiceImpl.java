@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.dao.SubwayMapper;
+import com.sean.dao.SubwayStationMapper;
 import com.sean.dao.SupportAddressMapper;
 import com.sean.dto.BaiduMapLocation;
 import com.sean.entity.Subway;
@@ -14,6 +15,7 @@ import com.sean.service.IAddressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,9 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Autowired
     private SubwayMapper subwayMapper;
+
+    @Autowired
+    private SubwayStationMapper subwayStationMapper;
 
     @Override
     public ServiceMultiResult<SupportAddress> findAllCities() {
@@ -36,7 +41,7 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
         Map<SupportAddress.Level, SupportAddress> result = new HashMap<>();
 
         SupportAddress city = this.lambdaQuery().eq(SupportAddress::getEnName, cityEnName).eq(SupportAddress::getLevel, SupportAddress.Level.CITY.getValue()).one();
-        SupportAddress region = this.lambdaQuery().eq(SupportAddress::getEnName, regionEnName).eq(SupportAddress::getLevel, SupportAddress.Level.REGION.getValue()).one();
+        SupportAddress region = this.lambdaQuery().eq(SupportAddress::getEnName, regionEnName).eq(SupportAddress::getBelongTo, city.getEnName()).one();
 
         result.put(SupportAddress.Level.CITY, city);
         result.put(SupportAddress.Level.REGION, region);
@@ -45,7 +50,13 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public ServiceMultiResult findAllRegionsByCityName(String cityName) {
-        return null;
+        if (cityName == null) {
+            return new ServiceMultiResult<>(0, null);
+        }
+
+        List<SupportAddress> regions = this.lambdaQuery().eq(SupportAddress::getLevel, SupportAddress.Level.REGION.getValue()).eq(SupportAddress::getBelongTo, cityName).list();
+
+        return new ServiceMultiResult(regions.size(), regions);
     }
 
     @Override
@@ -56,7 +67,8 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public List<SubwayStation> findAllStationBySubway(Long subwayId) {
-        return null;
+        List<SubwayStation> stations = new LambdaQueryChainWrapper<SubwayStation>(subwayStationMapper).eq(SubwayStation::getId, subwayId).list();
+        return stations;
     }
 
     @Override

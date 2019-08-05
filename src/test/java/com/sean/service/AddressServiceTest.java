@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.sean.base.ServiceMultiResult;
 import com.sean.entity.Subway;
+import com.sean.entity.SubwayStation;
 import com.sean.entity.SupportAddress;
 import com.sean.entity.User;
 import org.junit.Test;
@@ -44,6 +45,21 @@ public class AddressServiceTest {
         Map<SupportAddress.Level, SupportAddress> result = addressService.findCityAndRegion("bj", "dcq");
         System.out.println(result);
     }
+
+
+
+    @Test
+    public void findAllRegionsByCityName() {
+        ServiceMultiResult result = addressService.findAllRegionsByCityName("bj");
+        System.out.println(result);
+    }
+
+    @Test
+    public void findAllStationBySubway() {
+        List<SubwayStation> result = addressService.findAllStationBySubway(3L);
+        System.out.println(result);
+    }
+
 
 
 
