@@ -548,7 +548,7 @@
             $("#upload-cover-container").append(
                 '<div style="float: left; margin: 2px; padding: 2px; border: 1px dashed; width:' +
                 ' 120px; height: 100px;">' +
-                '<span><img src="http://localhost:8080/static/upload/' +
+                '<span><img src="http://localhost:8080/upload/' +
                 photo_path+ '"/></span></div>'
             );
 

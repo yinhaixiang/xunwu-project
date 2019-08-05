@@ -95,7 +95,7 @@ public class AdminController {
         int width = image.getWidth();
         int height = image.getHeight();
         String newFileName = UUID.randomUUID().toString() + ".jpg";
-        file.transferTo(new File(imageUploadDir + File.separator + newFileName));
+        file.transferTo(new File(imageUploadDir + newFileName));
 
         return ApiResponse.ofSuccess(new UploadImageDTO(newFileName, width, height));
 
