@@ -3,6 +3,7 @@ package com.sean.service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.sean.base.ServiceMultiResult;
+import com.sean.base.ServiceResult;
 import com.sean.entity.Subway;
 import com.sean.entity.SubwayStation;
 import com.sean.entity.SupportAddress;
@@ -62,6 +63,13 @@ public class AddressServiceTest {
 
 
 
+
+
+    @Test
+    public void findSubway() {
+        ServiceResult<Subway> result = addressService.findSubway(3L);
+        System.out.println(result);
+    }
 
 
 

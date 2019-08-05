@@ -73,7 +73,14 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public ServiceResult<Subway> findSubway(Long subwayId) {
-        return null;
+        if (subwayId == null) {
+            return ServiceResult.notFound();
+        }
+        Subway subway = subwayMapper.selectById(subwayId);
+        if (subway == null) {
+            return ServiceResult.notFound();
+        }
+        return ServiceResult.of(subway);
     }
 
     @Override
