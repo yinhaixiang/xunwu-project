@@ -3,6 +3,7 @@ package com.sean.service;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.sean.base.ServiceMultiResult;
+import com.sean.entity.Subway;
 import com.sean.entity.SupportAddress;
 import com.sean.entity.User;
 import org.junit.Test;
@@ -28,6 +29,14 @@ public class AddressServiceTest {
         ServiceMultiResult<SupportAddress> result = addressService.findAllCities();
         System.out.println(result);
     }
+
+    @Test
+    public void findAllSubwayByCity() {
+        String cityEnName = "bj";
+        List<Subway> result = addressService.findAllSubwayByCity(cityEnName);
+        System.out.println(result);
+    }
+
 
 
 

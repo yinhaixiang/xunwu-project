@@ -545,12 +545,14 @@
                 photo_width + '"/>').append('<input type="hidden" name="photos[' + photo_sequence + '].height" value="' +
                 photo_height + '"/>');
 
-            $("#upload-cover-container").append(
-                '<div style="float: left; margin: 2px; padding: 2px; border: 1px dashed; width:' +
-                ' 120px; height: 100px;">' +
-                '<span><img src="http://localhost:8080/upload/' +
-                photo_path+ '"/></span></div>'
-            );
+          $("#upload-cover-container").append(
+            '<div style="float: left; margin: 2px; padding: 2px; border: 1px dashed; width:' +
+            ' 120px; height: 100px;">' +
+            '<span><img src="http://localhost:8080/upload/' +
+            photo_path + '" title="待选封面" />' +
+            '<input style="margin-left: 5px;" type="radio" name="cover" value="' +
+            photo_path + '"/></span></div>'
+          );
 
             $("#upload-cover-container .cover-desc").css('display', 'none');
             photo_sequence++;
