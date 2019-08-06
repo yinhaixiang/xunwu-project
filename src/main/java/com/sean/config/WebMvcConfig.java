@@ -1,5 +1,6 @@
 package com.sean.config;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -81,5 +82,14 @@ public class WebMvcConfig implements WebMvcConfigurer, ApplicationContextAware {
         return viewResolver;
     }
 
+    /**
+     * Bean Util
+     *
+     * @return
+     */
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
 }

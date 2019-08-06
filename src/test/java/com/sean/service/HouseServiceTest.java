@@ -1,5 +1,6 @@
 package com.sean.service;
 
+import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.dto.HouseDTO;
 import com.sean.form.HouseForm;
@@ -62,6 +63,14 @@ public class HouseServiceTest {
 
 
         ServiceResult<HouseDTO> result = houseService.save(houseForm);
+        System.out.println(result);
+    }
+
+
+
+    @Test
+    public void adminQuery() {
+        ServiceMultiResult<HouseDTO> result = houseService.adminQuery(null);
         System.out.println(result);
     }
 

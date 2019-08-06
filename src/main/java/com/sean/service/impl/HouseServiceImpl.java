@@ -25,6 +25,9 @@ import java.util.List;
 public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements IHouseService {
 
     @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
     private HouseMapper houseMapper;
 
     @Autowired
@@ -54,7 +57,6 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
             return subwayValidtionResult;
         }
 
-        ModelMapper modelMapper = new ModelMapper();
         House house = modelMapper.map(houseForm, House.class);
 
         Date now = new Date();
@@ -96,7 +98,16 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public ServiceMultiResult<HouseDTO> adminQuery(DatatableSearch searchBody) {
-        return null;
+        List<HouseDTO> houseDTOS = new ArrayList<>();
+        List<House> houses = houseMapper.selectList(null);
+        houses.forEach(house -> {
+            HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
+            houseDTO.setCover(this.cdnPrefix + house.getCover());
+            houseDTOS.add(houseDTO);
+
+        });
+
+        return new ServiceMultiResult<>(houseDTOS.size(), houseDTOS);
     }
 
     @Override

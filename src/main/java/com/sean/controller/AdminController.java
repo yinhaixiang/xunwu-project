@@ -1,10 +1,13 @@
 package com.sean.controller;
 
+import com.sean.base.ApiDataTableResponse;
 import com.sean.base.ApiResponse;
+import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.dto.HouseDTO;
 import com.sean.dto.UploadImageDTO;
 import com.sean.entity.SupportAddress;
+import com.sean.form.DatatableSearch;
 import com.sean.form.HouseForm;
 import com.sean.service.IAddressService;
 import com.sean.service.IHouseService;
@@ -144,6 +147,19 @@ public class AdminController {
         return ApiResponse.ofSuccess(ApiResponse.Status.NOT_VALID_PARAM);
     }
 
+    @PostMapping("admin/houses")
+    @ResponseBody
+    public ApiDataTableResponse houses(@ModelAttribute DatatableSearch searchBody) {
+        ServiceMultiResult<HouseDTO> result = houseService.adminQuery(searchBody);
+
+        ApiDataTableResponse response = new ApiDataTableResponse(ApiResponse.Status.SUCCESS);
+
+        response.setData(result.getResult());
+        response.setRecordsFiltered(result.getTotal());
+        response.setRecordsTotal(result.getTotal());
+        response.setDraw(searchBody.getDraw());
+        return response;
+    }
 
 }
 
