@@ -12,6 +12,8 @@ import com.sean.entity.Subway;
 import com.sean.entity.SubwayStation;
 import com.sean.entity.SupportAddress;
 import com.sean.service.IAddressService;
+import com.sean.service.ISubwayService;
+import com.sean.service.ISubwayStationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,10 +27,10 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
 
     @Autowired
-    private SubwayMapper subwayMapper;
+    private ISubwayService subwayService;
 
     @Autowired
-    private SubwayStationMapper subwayStationMapper;
+    private ISubwayStationService subwayStationService;
 
     @Override
     public ServiceMultiResult<SupportAddress> findAllCities() {
@@ -61,13 +63,13 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
 
     @Override
     public List<Subway> findAllSubwayByCity(String cityEnName) {
-        List<Subway> result = new LambdaQueryChainWrapper<Subway>(subwayMapper).eq(Subway::getCityEnName, cityEnName).list();
+        List<Subway> result = subwayService.lambdaQuery().eq(Subway::getCityEnName, cityEnName).list();
         return result;
     }
 
     @Override
     public List<SubwayStation> findAllStationBySubway(Long subwayId) {
-        List<SubwayStation> stations = new LambdaQueryChainWrapper<SubwayStation>(subwayStationMapper).eq(SubwayStation::getId, subwayId).list();
+        List<SubwayStation> stations = subwayStationService.lambdaQuery().eq(SubwayStation::getId, subwayId).list();
         return stations;
     }
 
@@ -76,7 +78,7 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
         if (subwayId == null) {
             return ServiceResult.notFound();
         }
-        Subway subway = subwayMapper.selectById(subwayId);
+        Subway subway = subwayService.getById(subwayId);
         if (subway == null) {
             return ServiceResult.notFound();
         }
@@ -88,7 +90,7 @@ public class AddressServiceImpl extends ServiceImpl<SupportAddressMapper, Suppor
         if (stationId == null) {
             return ServiceResult.notFound();
         }
-        SubwayStation station = subwayStationMapper.selectById(stationId);
+        SubwayStation station = subwayStationService.getById(stationId);
         if (station == null) {
             return ServiceResult.notFound();
         }
