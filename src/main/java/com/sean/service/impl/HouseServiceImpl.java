@@ -2,19 +2,19 @@ package com.sean.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sean.HouseSubscribeStatus;
+import com.sean.base.LoginUserUtil;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
-import com.sean.dao.*;
+import com.sean.dao.HouseMapper;
 import com.sean.dto.HouseDTO;
 import com.sean.entity.*;
 import com.sean.form.*;
-import com.sean.service.IHouseService;
+import com.sean.service.*;
 import javafx.util.Pair;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.ModelMap;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,32 +23,68 @@ import java.util.List;
 @Service
 public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements IHouseService {
 
-
-    @Autowired
-    private SubwayMapper subwayMapper;
-
-    @Autowired
-    private SubwayStationMapper subwayStationMapper;
-
     @Autowired
     private HouseMapper houseMapper;
 
     @Autowired
-    private HouseDetailMapper houseDetailMapper;
+    private ISubwayService subwayService;
 
     @Autowired
-    private HousePictureMapper housePictureMapper;
+    private ISubwayStationService subwayStationService;
 
+    @Autowired
+    private IHouseDetailService houseDetailService;
 
-//    private Ihouse houseService;
+    @Autowired
+    private IHousePictureService housePictureService;
+
+    @Autowired
+    private IHouseTagService houseTagService;
 
     @Value("${cdn_prefix}")
     private String cdnPrefix;
 
     @Override
     public ServiceResult<HouseDTO> save(HouseForm houseForm) {
-        return null;
+        HouseDetail detail = new HouseDetail();
+        ServiceResult<HouseDTO> subwayValidtionResult = wrapperDetailInfo(detail, houseForm);
+        if (subwayValidtionResult != null) {
+            return subwayValidtionResult;
+        }
 
+        ModelMapper modelMapper = new ModelMapper();
+        House house = modelMapper.map(houseForm, House.class);
+
+        Date now = new Date();
+        house.setCreateTime(now);
+        house.setLastUpdateTime(now);
+        house.setAdminId(LoginUserUtil.getLoginUserId());
+        houseMapper.insert(house);
+
+        detail.setHouseId(house.getId());
+        houseDetailService.save(detail);
+
+        List<HousePicture> housePictures = generatePictures(houseForm, house.getId());
+        housePictureService.saveBatch(housePictures);
+
+        HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
+
+        houseDTO.setHouseDetail(detail);
+
+        houseDTO.setPictures(housePictures);
+        houseDTO.setCover(this.cdnPrefix + houseDTO.getCover());
+
+        List<String> tags = houseForm.getTags();
+        if (tags != null && !tags.isEmpty()) {
+            List<HouseTag> houseTags = new ArrayList<>();
+            for (String tag : tags) {
+                houseTags.add(HouseTag.builder().houseId(house.getId()).name(tag).build());
+            }
+            houseTagService.saveBatch(houseTags);
+            houseDTO.setTags(tags);
+        }
+
+        return new ServiceResult<HouseDTO>(true, null, houseDTO);
     }
 
     @Override
@@ -145,13 +181,13 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
      * @return
      */
     private ServiceResult<HouseDTO> wrapperDetailInfo(HouseDetail houseDetail, HouseForm houseForm) {
-        Subway subway = subwayMapper.selectById(houseForm.getSubwayLineId());
+        Subway subway = subwayService.getById(houseForm.getSubwayLineId());
 
         if (subway == null) {
             return new ServiceResult<>(false, "Not valid subway line!");
         }
 
-        SubwayStation subwayStation = subwayStationMapper.selectById(houseForm.getSubwayStationId());
+        SubwayStation subwayStation = subwayStationService.getById(houseForm.getSubwayStationId());
 
         if (subwayStation == null || !subway.getId().equals(subwayStation.getSubwayId())) {
             return new ServiceResult<>(false, "Not valid subway station!");
