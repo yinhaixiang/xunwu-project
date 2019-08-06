@@ -3,6 +3,7 @@ package com.sean.controller;
 import com.sean.base.ApiResponse;
 import com.sean.base.ServiceMultiResult;
 import com.sean.entity.Subway;
+import com.sean.entity.SubwayStation;
 import com.sean.entity.SupportAddress;
 import com.sean.service.IAddressService;
 import com.sean.service.IHouseService;
@@ -60,5 +61,39 @@ public class HouseController {
         return ApiResponse.ofSuccess(subways);
     }
 
+
+    /**
+     * 获取对应城市支持区域列表
+     *
+     * @param cityEnName
+     * @return
+     */
+    @GetMapping("address/support/regions")
+    @ResponseBody
+    public ApiResponse getSupportRegions(@RequestParam(name = "city_name") String cityEnName) {
+        ServiceMultiResult<SupportAddress> addressResult = addressService.findAllRegionsByCityName(cityEnName);
+        if (addressResult.getResult() == null || addressResult.getTotal() < 1) {
+            return ApiResponse.ofStatus(ApiResponse.Status.NOT_FOUND);
+        }
+        return ApiResponse.ofSuccess(addressResult.getResult());
+    }
+
+
+    /**
+     * 获取对应地铁线路所支持的地铁站点
+     *
+     * @param subwayId
+     * @return
+     */
+    @GetMapping("address/support/subway/station")
+    @ResponseBody
+    public ApiResponse getSupportSubwayStation(@RequestParam(name = "subway_id") Long subwayId) {
+        List<SubwayStation> stationDTOS = addressService.findAllStationBySubway(subwayId);
+        if (stationDTOS.isEmpty()) {
+            return ApiResponse.ofStatus(ApiResponse.Status.NOT_FOUND);
+        }
+
+        return ApiResponse.ofSuccess(stationDTOS);
+    }
 
 }

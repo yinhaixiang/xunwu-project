@@ -106,7 +106,7 @@ public class AdminController {
         BufferedImage image = ImageIO.read(file.getInputStream());
         int width = image.getWidth();
         int height = image.getHeight();
-        String newFileName = UUID.randomUUID().toString() + ".jpg";
+        String newFileName = System.currentTimeMillis() + ".jpg";
         file.transferTo(new File(imageUploadDir + newFileName));
 
         return ApiResponse.ofSuccess(new UploadImageDTO(newFileName, width, height));

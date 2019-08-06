@@ -15,6 +15,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,6 +46,7 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     private String cdnPrefix;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public ServiceResult<HouseDTO> save(HouseForm houseForm) {
         HouseDetail detail = new HouseDetail();
         ServiceResult<HouseDTO> subwayValidtionResult = wrapperDetailInfo(detail, houseForm);
