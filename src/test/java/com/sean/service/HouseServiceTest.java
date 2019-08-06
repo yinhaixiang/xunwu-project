@@ -26,7 +26,7 @@ public class HouseServiceTest {
 
 
     @Test
-    @Rollback(true)
+    @Rollback(false)
     public void save() {
         HouseForm houseForm = new HouseForm();
         houseForm.setTitle("title01");
