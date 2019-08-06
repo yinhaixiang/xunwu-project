@@ -8,10 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sean.HouseSubscribeStatus;
-import com.sean.base.HouseStatus;
-import com.sean.base.LoginUserUtil;
-import com.sean.base.ServiceMultiResult;
-import com.sean.base.ServiceResult;
+import com.sean.base.*;
 import com.sean.dao.HouseMapper;
 import com.sean.dto.HouseDTO;
 import com.sean.entity.*;
@@ -116,8 +113,8 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
                 .ne(House::getStatus, HouseStatus.DELETED.getValue())
                 .eq(StringUtils.isNotEmpty(searchBody.getCity()), House::getCityEnName, searchBody.getCity())
                 .eq(searchBody.getStatus() != null, House::getStatus, searchBody.getStatus())
-                .ge(searchBody.getCreateTimeMin() != null, House::getCreateTime, searchBody.getCreateTimeMin())
-                .le(searchBody.getCreateTimeMax() != null, House::getCreateTime, searchBody.getCreateTimeMax())
+                .apply(searchBody.getCreateTimeMin() != null, "date_format(create_time,'%Y-%m-%d') >= {0}", DateUtil.getStringYmdByDate(searchBody.getCreateTimeMin()))
+                .apply(searchBody.getCreateTimeMax() != null, "date_format(create_time,'%Y-%m-%d') <= {0}", DateUtil.getStringYmdByDate(searchBody.getCreateTimeMax()))
                 .like(StringUtils.isNotEmpty(searchBody.getTitle()), House::getTitle, searchBody.getTitle());
 
 
