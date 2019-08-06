@@ -17,6 +17,7 @@ public class SupportAddress {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    @JsonProperty(value = "belong_to")
     private String belongTo;
 
     @JsonProperty(value = "en_name")

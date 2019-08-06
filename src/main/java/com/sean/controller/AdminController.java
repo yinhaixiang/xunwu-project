@@ -1,22 +1,28 @@
 package com.sean.controller;
 
 import com.sean.base.ApiResponse;
+import com.sean.base.ServiceResult;
+import com.sean.dto.HouseDTO;
 import com.sean.dto.UploadImageDTO;
+import com.sean.entity.SupportAddress;
+import com.sean.form.HouseForm;
+import com.sean.service.IAddressService;
+import com.sean.service.IHouseService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.Map;
 import java.util.UUID;
 
 
@@ -25,6 +31,12 @@ public class AdminController {
 
     @Value("${image_upload_dir}")
     private String imageUploadDir;
+
+    @Autowired
+    private IAddressService addressService;
+
+    @Autowired
+    private IHouseService houseService;
 
     /**
      * 后台管理中心
@@ -98,8 +110,38 @@ public class AdminController {
         file.transferTo(new File(imageUploadDir + newFileName));
 
         return ApiResponse.ofSuccess(new UploadImageDTO(newFileName, width, height));
+    }
 
 
+    /**
+     * 新增房源接口
+     *
+     * @param houseForm
+     * @param bindingResult
+     * @return
+     */
+    @PostMapping("admin/add/house")
+    @ResponseBody
+    public ApiResponse addHouse(@Valid @ModelAttribute("form-house-add") HouseForm houseForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), bindingResult.getAllErrors().get(0).getDefaultMessage(), null);
+        }
+
+        if (houseForm.getPhotos() == null || houseForm.getCover() == null) {
+            return ApiResponse.ofMessage(HttpStatus.BAD_REQUEST.value(), "必须上传图片");
+        }
+
+        Map<SupportAddress.Level, SupportAddress> addressMap = addressService.findCityAndRegion(houseForm.getCityEnName(), houseForm.getRegionEnName());
+        if (addressMap.keySet().size() != 2) {
+            return ApiResponse.ofStatus(ApiResponse.Status.NOT_VALID_PARAM);
+        }
+
+        ServiceResult<HouseDTO> result = houseService.save(houseForm);
+        if (result.isSuccess()) {
+            return ApiResponse.ofSuccess(result.getResult());
+        }
+
+        return ApiResponse.ofSuccess(ApiResponse.Status.NOT_VALID_PARAM);
     }
 
 
