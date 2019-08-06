@@ -103,10 +103,8 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     @Override
     public ServiceMultiResult<HouseDTO> adminQuery(DatatableSearch searchBody) {
         List<HouseDTO> houseDTOS = new ArrayList<>();
-
-        System.out.println(searchBody.getStart());
-        Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1, searchBody.getLength());
-
+        Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1,
+                searchBody.getLength());
 
         LambdaQueryWrapper<House> queryWrapper = Wrappers.<House>lambdaQuery()
                 .eq(House::getAdminId, LoginUserUtil.getLoginUserId())
@@ -127,7 +125,6 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
             houseDTO.setCover(this.cdnPrefix + house.getCover());
             houseDTOS.add(houseDTO);
         });
-
 
         return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
     }
