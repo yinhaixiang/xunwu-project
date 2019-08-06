@@ -15,8 +15,6 @@ public class HouseDetail {
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    private Long houseId;
-
     private String description;
 
     private String layoutDesc;
@@ -27,13 +25,15 @@ public class HouseDetail {
 
     private int rentWay;
 
-    private String detailAddress;
+    private String address;
 
     private Long subwayLineId;
 
-    private Long subwayStationId;
-
     private String subwayLineName;
 
+    private Long subwayStationId;
+
     private String subwayStationName;
+
+    private Long houseId;
 }

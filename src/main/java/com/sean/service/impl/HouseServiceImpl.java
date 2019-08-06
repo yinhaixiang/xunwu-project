@@ -200,7 +200,7 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         houseDetail.setSubwayStationName(subwayStation.getName());
 
         houseDetail.setDescription(houseForm.getDescription());
-        houseDetail.setDetailAddress(houseForm.getDetailAddress());
+        houseDetail.setAddress(houseForm.getDetailAddress());
         houseDetail.setLayoutDesc(houseForm.getLayoutDesc());
         houseDetail.setRentWay(houseForm.getRentWay());
         houseDetail.setRoundService(houseForm.getRoundService());
