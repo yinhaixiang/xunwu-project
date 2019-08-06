@@ -44,7 +44,7 @@ public class HouseServiceTest {
     @Rollback(false)
     public void save() {
         HouseForm houseForm = new HouseForm();
-        houseForm.setTitle("title01");
+        houseForm.setTitle("title05");
         houseForm.setCityEnName("sh");
         houseForm.setRegionEnName("pudong");
         houseForm.setStreet("花木街道");
