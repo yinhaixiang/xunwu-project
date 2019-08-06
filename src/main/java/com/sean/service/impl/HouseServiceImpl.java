@@ -2,10 +2,13 @@ package com.sean.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.service.additional.query.impl.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sean.HouseSubscribeStatus;
+import com.sean.base.HouseStatus;
 import com.sean.base.LoginUserUtil;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
@@ -106,7 +109,19 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
         System.out.println(searchBody.getStart());
         Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1, searchBody.getLength());
-        IPage<House> housesPage = this.page(page);
+
+
+        LambdaQueryWrapper<House> queryWrapper = Wrappers.<House>lambdaQuery()
+                .eq(House::getAdminId, LoginUserUtil.getLoginUserId())
+                .ne(House::getStatus, HouseStatus.DELETED.getValue())
+                .eq(StringUtils.isNotEmpty(searchBody.getCity()), House::getCityEnName, searchBody.getCity())
+                .eq(searchBody.getStatus() != null, House::getStatus, searchBody.getStatus())
+                .ge(searchBody.getCreateTimeMin() != null, House::getCreateTime, searchBody.getCreateTimeMin())
+                .le(searchBody.getCreateTimeMax() != null, House::getCreateTime, searchBody.getCreateTimeMax())
+                .like(StringUtils.isNotEmpty(searchBody.getTitle()), House::getTitle, searchBody.getTitle());
+
+
+        IPage<House> housesPage = this.page(page, queryWrapper);
 
         List<House> houses = housesPage.getRecords();
 
