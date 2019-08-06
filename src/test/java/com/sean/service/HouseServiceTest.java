@@ -1,8 +1,14 @@
 package com.sean.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.dto.HouseDTO;
+import com.sean.entity.House;
+import com.sean.entity.Subway;
 import com.sean.form.HouseForm;
 import com.sean.form.PhotoForm;
 import org.junit.Test;
@@ -67,10 +73,18 @@ public class HouseServiceTest {
     }
 
 
-
     @Test
     public void adminQuery() {
         ServiceMultiResult<HouseDTO> result = houseService.adminQuery(null);
+        System.out.println(result);
+    }
+
+
+    @Test
+    public void selectPage() {
+        Page<House> page = new Page<House>(1, 2);
+        LambdaQueryWrapper<House> wp = Wrappers.<House>lambdaQuery().ge(House::getId, 1L);
+        IPage<House> result = houseService.page(page, wp);
         System.out.println(result);
     }
 

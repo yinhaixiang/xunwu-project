@@ -1,5 +1,9 @@
 package com.sean.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sean.HouseSubscribeStatus;
 import com.sean.base.LoginUserUtil;
@@ -99,15 +103,21 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     @Override
     public ServiceMultiResult<HouseDTO> adminQuery(DatatableSearch searchBody) {
         List<HouseDTO> houseDTOS = new ArrayList<>();
-        List<House> houses = houseMapper.selectList(null);
+
+        System.out.println(searchBody.getStart());
+        Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1, searchBody.getLength());
+        IPage<House> housesPage = this.page(page);
+
+        List<House> houses = housesPage.getRecords();
+
         houses.forEach(house -> {
             HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
             houseDTO.setCover(this.cdnPrefix + house.getCover());
             houseDTOS.add(houseDTO);
-
         });
 
-        return new ServiceMultiResult<>(houseDTOS.size(), houseDTOS);
+
+        return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
     }
 
     @Override
