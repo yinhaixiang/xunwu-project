@@ -110,15 +110,15 @@ var table = $('#data-table').DataTable({
                 content = '',
                 suffix = '<a style="text-decoration:none" class="ml-5"' +
                     ' onClick="house_edit(\'房源编辑\', \'/admin/house/edit?id=' + row.id + '\')" href="javascript:;"' +
-                    ' title="编辑"><i class="Hui-iconfont">&#xe6df;</i></a> <a style="text-decoration:none" class="ml-5"' +
+                    ' title="编辑"><i class="Hui-iconfont">编辑</i></a> <a style="text-decoration:none" class="ml-5"' +
                     ' onClick="house_del(this, ' + row.id + ')" href="javascript:;" title="删除"><i' +
-                    ' class="Hui-iconfont">&#xe6e2;</i></a></td>';
+                    ' class="Hui-iconfont">删除</i></a></td>';
             if (data_status === 0) { // 待审核
                 content = '<a style="text-decoration:none" onClick="house_pass(this,' + row.id + ')"' +
                     ' href="javascript:;" title="发布">发布</a>&nbsp;';
             } else if (data_status === 1) { // 已发布
                 content = '<a style="text-decoration:none" onClick="house_stop(this,' + row.id + ')"' +
-                    ' href="javascript:;" title="下架"><i class="Hui-iconfont">&#xe6de;</i></a>&nbsp;'
+                    ' href="javascript:;" title="下架"><i class="Hui-iconfont">下架</i></a>&nbsp;'
             }
 
             return prefix + content + suffix;
