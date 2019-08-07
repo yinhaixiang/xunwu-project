@@ -30,30 +30,30 @@ public class UserServiceTest {
     }
 
 
-    @Test
-    public void getOne2() {
-        User result = userService.lambdaQuery().gt(User::getStatus, 0).one();
-        System.out.println(result);
-    }
+//    @Test
+//    public void getOne2() {
+//        User result = userService.lambdaQuery().gt(User::getStatus, 0).one();
+//        System.out.println(result);
+//    }
 
 
     @Test
-    @Rollback(false)
+    @Rollback(true)
     public void update() {
         boolean result = userService.lambdaUpdate().gt(User::getStatus, 0).set(User::getAvatar, "zzz").update();
         System.out.println(result);
     }
 
 
-    @Test
-    @Rollback(true)
-    public void addUserByPhone() {
-        User result = userService.addUserByPhone("13477777777");
-        System.out.println(result);
-    }
+//    @Test
+//    @Rollback(true)
+//    public void addUserByPhone() {
+//        User result = userService.addUserByPhone("13477777777");
+//        System.out.println(result);
+//    }
 
     @Test
-    @Rollback(false)
+    @Rollback(true)
     public void modifyUserProfile() {
         ServiceResult result = userService.modifyUserProfile("name", "sean");
         System.out.println(result);
