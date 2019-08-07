@@ -1,5 +1,6 @@
 package com.sean;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.sean.base.DateUtil;
 import com.sean.form.DatatableSearch;
 
@@ -10,26 +11,10 @@ import java.util.Date;
 public class TT {
 
     public static void main(String args[]) throws ParseException {
+        String s1 = "";
+        String s2 = null;
 
-//        Date dNow = new Date();
-//        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-//
-//
-//        Date result = ft.parse("2019-08-06 00:00:00");
-//        System.out.println(result);
-
-
-        DatatableSearch searchBody = new DatatableSearch();
-        searchBody.setStart(0);
-        searchBody.setLength(10);
-        Date dNow = new Date();
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Date createTimeMax = ft.parse("2019-08-06 00:00:00");
-
-        searchBody.setCreateTimeMax(createTimeMax);
-
-
-        String stringYmdByDate = DateUtil.getStringYmdByDate(searchBody.getCreateTimeMax());
-        System.out.println(stringYmdByDate);
+        System.out.println(StringUtils.isEmpty(s1));
+        System.out.println(StringUtils.isEmpty(s2));
     }
 }

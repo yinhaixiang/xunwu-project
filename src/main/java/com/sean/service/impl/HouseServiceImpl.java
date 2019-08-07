@@ -49,6 +49,9 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     @Autowired
     private IHouseTagService houseTagService;
 
+    @Autowired
+    private IHouseSubscribeService houseSubscribeService;
+
     @Value("${cdn_prefix}")
     private String cdnPrefix;
 
@@ -131,7 +134,36 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public ServiceResult<HouseDTO> findCompleteOne(Long id) {
-        return null;
+        House house = this.getById(id);
+        if (house == null) {
+            return ServiceResult.notFound();
+        }
+
+        HouseDetail detailDTO = houseDetailService.lambdaQuery().eq(HouseDetail::getHouseId, id).one();
+        List<HousePicture> pictureDTOS = housePictureService.lambdaQuery().eq(HousePicture::getHouseId, id).list();
+
+        List<HouseTag> tags = houseTagService.lambdaQuery().eq(HouseTag::getHouseId, id).list();
+
+        List<String> tagList = new ArrayList<>();
+        for (HouseTag tag : tags) {
+            tagList.add(tag.getName());
+        }
+
+        HouseDTO result = modelMapper.map(house, HouseDTO.class);
+        result.setHouseDetail(detailDTO);
+        result.setPictures(pictureDTOS);
+        result.setTags(tagList);
+
+        if (LoginUserUtil.getLoginUserId() > 0) { // 已登录用户
+            HouseSubscribe subscribe = houseSubscribeService.lambdaQuery()
+                    .eq(HouseSubscribe::getHouseId, house.getId())
+                    .eq(HouseSubscribe::getUserId, LoginUserUtil.getLoginUserId())
+                    .one();
+            if (subscribe != null) {
+                result.setSubscribeStatus(subscribe.getStatus());
+            }
+        }
+        return ServiceResult.of(result);
     }
 
     @Override
@@ -145,13 +177,37 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     }
 
     @Override
+    @Transactional
     public ServiceResult addTag(Long houseId, String tag) {
-        return null;
+        House house = this.getById(houseId);
+        if (house == null) {
+            return ServiceResult.notFound();
+        }
+
+        HouseTag houseTag = houseTagService.lambdaQuery().eq(HouseTag::getName, tag).eq(HouseTag::getHouseId, houseId).one();
+        if (houseTag != null) {
+            return new ServiceResult(false, "标签已存在");
+        }
+
+        houseTagService.save(new HouseTag(houseId, tag));
+        return ServiceResult.success();
     }
 
     @Override
+    @Transactional
     public ServiceResult removeTag(Long houseId, String tag) {
-        return null;
+        House house = this.getById(houseId);
+        if (house == null) {
+            return ServiceResult.notFound();
+        }
+
+        HouseTag houseTag = houseTagService.lambdaQuery().eq(HouseTag::getName, tag).eq(HouseTag::getHouseId, houseId).one();
+        if (houseTag == null) {
+            return new ServiceResult(false, "标签不存在");
+        }
+
+        houseTagService.removeById(houseTag.getId());
+        return ServiceResult.success();
     }
 
     @Override

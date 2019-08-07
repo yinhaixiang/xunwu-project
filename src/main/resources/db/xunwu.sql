@@ -116,7 +116,7 @@ CREATE TABLE `house_subscribe` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `house_id` int(11) NOT NULL COMMENT '房源id',
   `user_id` int(11) NOT NULL COMMENT '用户id',
-  `desc` varchar(255) DEFAULT NULL COMMENT '用户描述',
+  `description` varchar(255) DEFAULT NULL COMMENT '用户描述',
   `status` int(2) NOT NULL DEFAULT '0' COMMENT '预约状态 1-加入待看清单 2-已预约看房时间 3-看房完成',
   `create_time` datetime NOT NULL COMMENT '数据创建时间',
   `last_update_time` datetime NOT NULL COMMENT '记录更新时间',
