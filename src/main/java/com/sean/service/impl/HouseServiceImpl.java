@@ -21,9 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements IHouseService {
@@ -144,9 +142,9 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
                 searchBody.getLength());
 
         // 为了排序时用
-        if("createTime".equals(searchBody.getOrderBy())) {
+        if ("createTime".equals(searchBody.getOrderBy())) {
             searchBody.setOrderBy("create_time");
-        } else if("watchTimes".equals(searchBody.getOrderBy())) {
+        } else if ("watchTimes".equals(searchBody.getOrderBy())) {
             searchBody.setOrderBy("watch_times");
         }
 
@@ -285,7 +283,16 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public ServiceMultiResult<HouseDTO> query(RentSearch rentSearch) {
-        return null;
+        if (rentSearch.getKeywords() != null && !rentSearch.getKeywords().isEmpty()) {
+            ServiceMultiResult<Long> serviceResult = searchService.query(rentSearch);
+            if (serviceResult.getTotal() == 0) {
+                return new ServiceMultiResult<>(0, new ArrayList<>());
+            }
+
+            return new ServiceMultiResult<HouseDTO>(serviceResult.getTotal(), wrapperHouseResult(serviceResult.getResult()));
+        }
+
+        return simpleQuery(rentSearch);
     }
 
     @Override
@@ -389,5 +396,47 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
             pictures.add(picture);
         }
         return pictures;
+    }
+
+
+    private List<HouseDTO> wrapperHouseResult(List<Long> houseIds) {
+        List<HouseDTO> result = new ArrayList<>();
+
+        Map<Long, HouseDTO> idToHouseMap = new HashMap<>();
+        List<House> houses = this.lambdaQuery().in(House::getId, houseIds).list();
+        houses.forEach(house -> {
+            HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
+            houseDTO.setCover(this.cdnPrefix + house.getCover());
+            idToHouseMap.put(house.getId(), houseDTO);
+        });
+
+        wrapperHouseList(houseIds, idToHouseMap);
+
+        // 矫正顺序
+        for (Long houseId : houseIds) {
+            result.add(idToHouseMap.get(houseId));
+        }
+        return result;
+    }
+
+
+    /**
+     * 渲染详细信息 及 标签
+     *
+     * @param houseIds
+     * @param idToHouseMap
+     */
+    private void wrapperHouseList(List<Long> houseIds, Map<Long, HouseDTO> idToHouseMap) {
+        List<HouseDetail> details = houseDetailService.lambdaQuery().in(HouseDetail::getHouseId, houseIds).list();
+        details.forEach(houseDetail -> {
+            HouseDTO houseDTO = idToHouseMap.get(houseDetail.getHouseId());
+            houseDTO.setHouseDetail(houseDetail);
+        });
+
+        List<HouseTag> houseTags = houseTagService.lambdaQuery().in(HouseTag::getHouseId, houseIds).list();
+        houseTags.forEach(houseTag -> {
+            HouseDTO house = idToHouseMap.get(houseTag.getHouseId());
+            house.getTags().add(houseTag.getName());
+        });
     }
 }
