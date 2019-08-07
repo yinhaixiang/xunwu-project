@@ -1,6 +1,7 @@
 package com.sean.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -142,14 +143,22 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1,
                 searchBody.getLength());
 
-        LambdaQueryWrapper<House> queryWrapper = Wrappers.<House>lambdaQuery()
-                .eq(House::getAdminId, LoginUserUtil.getLoginUserId())
-                .ne(House::getStatus, HouseStatus.DELETED.getValue())
-                .eq(StringUtils.isNotEmpty(searchBody.getCity()), House::getCityEnName, searchBody.getCity())
-                .eq(searchBody.getStatus() != null, House::getStatus, searchBody.getStatus())
+        // 为了排序时用
+        if("createTime".equals(searchBody.getOrderBy())) {
+            searchBody.setOrderBy("create_time");
+        } else if("watchTimes".equals(searchBody.getOrderBy())) {
+            searchBody.setOrderBy("watch_times");
+        }
+
+        QueryWrapper<House> queryWrapper = Wrappers.<House>query()
+                .eq("admin_id", LoginUserUtil.getLoginUserId())
+                .ne("status", HouseStatus.DELETED.getValue())
+                .eq(StringUtils.isNotEmpty(searchBody.getCity()), "city_en_name", searchBody.getCity())
+                .eq(searchBody.getStatus() != null, "status", searchBody.getStatus())
                 .apply(searchBody.getCreateTimeMin() != null, "date_format(create_time,'%Y-%m-%d') >= {0}", DateUtil.getStringYmdByDate(searchBody.getCreateTimeMin()))
                 .apply(searchBody.getCreateTimeMax() != null, "date_format(create_time,'%Y-%m-%d') <= {0}", DateUtil.getStringYmdByDate(searchBody.getCreateTimeMax()))
-                .like(StringUtils.isNotEmpty(searchBody.getTitle()), House::getTitle, searchBody.getTitle());
+                .like(StringUtils.isNotEmpty(searchBody.getTitle()), "title", searchBody.getTitle())
+                .orderBy(true, "asc".equals(searchBody.getDirection()), searchBody.getOrderBy());
 
 
         IPage<House> housesPage = this.page(page, queryWrapper);

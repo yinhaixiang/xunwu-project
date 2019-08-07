@@ -99,7 +99,7 @@ public class HouseServiceTest {
     @Test
     public void selectPage() {
         Page<House> page = new Page<House>(1, 2);
-        LambdaQueryWrapper<House> wp = Wrappers.<House>lambdaQuery().ge(House::getId, 1L);
+        LambdaQueryWrapper<House> wp = Wrappers.<House>lambdaQuery().ge(House::getId, 1L).orderBy(true, false,House::getId);
         IPage<House> result = houseService.page(page, wp);
         System.out.println(result);
     }
