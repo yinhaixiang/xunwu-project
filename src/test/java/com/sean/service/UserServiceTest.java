@@ -38,9 +38,9 @@ public class UserServiceTest {
 
 
     @Test
-    @Rollback(true)
+    @Rollback(false)
     public void update() {
-        boolean result = userService.lambdaUpdate().gt(User::getStatus, 0).set(User::getAvatar, "xxx").update();
+        boolean result = userService.lambdaUpdate().gt(User::getStatus, 0).set(User::getAvatar, "zzz").update();
         System.out.println(result);
     }
 
@@ -58,6 +58,8 @@ public class UserServiceTest {
         ServiceResult result = userService.modifyUserProfile("name", "sean");
         System.out.println(result);
     }
+
+
 
 
 
