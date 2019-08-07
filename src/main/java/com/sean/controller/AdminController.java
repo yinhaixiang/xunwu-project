@@ -205,31 +205,31 @@ public class AdminController {
         return "admin/house-edit";
     }
 
-//    /**
-//     * 编辑接口
-//     */
-//    @PostMapping("admin/house/edit")
-//    @ResponseBody
-//    public ApiResponse saveHouse(@Valid @ModelAttribute("form-house-edit") HouseForm houseForm, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()) {
-//            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), bindingResult.getAllErrors().get(0).getDefaultMessage(), null);
-//        }
-//
-//        Map<SupportAddress.Level, SupportAddressDTO> addressMap = addressService.findCityAndRegion(houseForm.getCityEnName(), houseForm.getRegionEnName());
-//
-//        if (addressMap.keySet().size() != 2) {
-//            return ApiResponse.ofSuccess(ApiResponse.Status.NOT_VALID_PARAM);
-//        }
-//
-//        ServiceResult result = houseService.update(houseForm);
-//        if (result.isSuccess()) {
-//            return ApiResponse.ofSuccess(null);
-//        }
-//
-//        ApiResponse response = ApiResponse.ofStatus(ApiResponse.Status.BAD_REQUEST);
-//        response.setMessage(result.getMessage());
-//        return response;
-//    }
+    /**
+     * 编辑接口
+     */
+    @PostMapping("admin/house/edit")
+    @ResponseBody
+    public ApiResponse saveHouse(@Valid @ModelAttribute("form-house-edit") HouseForm houseForm, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return new ApiResponse(HttpStatus.BAD_REQUEST.value(), bindingResult.getAllErrors().get(0).getDefaultMessage(), null);
+        }
+
+        Map<SupportAddress.Level, SupportAddress> addressMap = addressService.findCityAndRegion(houseForm.getCityEnName(), houseForm.getRegionEnName());
+
+        if (addressMap.keySet().size() != 2) {
+            return ApiResponse.ofSuccess(ApiResponse.Status.NOT_VALID_PARAM);
+        }
+
+        ServiceResult result = houseService.update(houseForm);
+        if (result.isSuccess()) {
+            return ApiResponse.ofSuccess(null);
+        }
+
+        ApiResponse response = ApiResponse.ofStatus(ApiResponse.Status.BAD_REQUEST);
+        response.setMessage(result.getMessage());
+        return response;
+    }
 
 
     /**
