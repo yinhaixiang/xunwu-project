@@ -244,8 +244,34 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
     }
 
     @Override
+    @Transactional
     public ServiceResult updateStatus(Long id, int status) {
-        return null;
+        House house = this.getById(id);
+        if (house == null) {
+            return ServiceResult.notFound();
+        }
+
+        if (house.getStatus() == status) {
+            return new ServiceResult(false, "状态没有发生变化");
+        }
+
+        if (house.getStatus() == HouseStatus.RENTED.getValue()) {
+            return new ServiceResult(false, "已出租的房源不允许修改状态");
+        }
+
+        if (house.getStatus() == HouseStatus.DELETED.getValue()) {
+            return new ServiceResult(false, "已删除的资源不允许操作");
+        }
+
+        boolean updateResult = this.lambdaUpdate().eq(House::getId, id).set(House::getStatus, status).update();
+
+        // TODO 上架更新索引 其他情况都要删除索引
+//        if (status == HouseStatus.PASSES.getValue()) {
+//            searchService.index(id);
+//        } else {
+//            searchService.remove(id);
+//        }
+        return ServiceResult.success();
     }
 
     @Override

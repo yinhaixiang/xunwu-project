@@ -1,10 +1,7 @@
 package com.sean.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.sean.base.ApiDataTableResponse;
-import com.sean.base.ApiResponse;
-import com.sean.base.ServiceMultiResult;
-import com.sean.base.ServiceResult;
+import com.sean.base.*;
 import com.sean.dto.HouseDTO;
 import com.sean.dto.UploadImageDTO;
 import com.sean.entity.HouseDetail;
@@ -31,7 +28,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.UUID;
 
 
 @Controller
@@ -278,6 +274,46 @@ public class AdminController {
         }
     }
 
+
+    /**
+     * 审核接口
+     *
+     * @param id
+     * @param operation
+     * @return
+     */
+    @PutMapping("admin/house/operate/{id}/{operation}")
+    @ResponseBody
+    public ApiResponse operateHouse(@PathVariable(value = "id") Long id,
+                                    @PathVariable(value = "operation") int operation) {
+        if (id <= 0) {
+            return ApiResponse.ofStatus(ApiResponse.Status.NOT_VALID_PARAM);
+        }
+        ServiceResult result;
+
+        switch (operation) {
+            case HouseOperation.PASS:
+                result = this.houseService.updateStatus(id, HouseStatus.PASSES.getValue());
+                break;
+            case HouseOperation.PULL_OUT:
+                result = this.houseService.updateStatus(id, HouseStatus.NOT_AUDITED.getValue());
+                break;
+            case HouseOperation.DELETE:
+                result = this.houseService.updateStatus(id, HouseStatus.DELETED.getValue());
+                break;
+            case HouseOperation.RENT:
+                result = this.houseService.updateStatus(id, HouseStatus.RENTED.getValue());
+                break;
+            default:
+                return ApiResponse.ofStatus(ApiResponse.Status.BAD_REQUEST);
+        }
+
+        if (result.isSuccess()) {
+            return ApiResponse.ofSuccess(null);
+        }
+        return ApiResponse.ofMessage(HttpStatus.BAD_REQUEST.value(),
+                result.getMessage());
+    }
 
 }
 
