@@ -14,6 +14,7 @@ import com.sean.entity.Subway;
 import com.sean.form.DatatableSearch;
 import com.sean.form.HouseForm;
 import com.sean.form.PhotoForm;
+import com.sean.form.RentSearch;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class HouseServiceTest {
     @Test
     public void selectPage() {
         Page<House> page = new Page<House>(1, 2);
-        LambdaQueryWrapper<House> wp = Wrappers.<House>lambdaQuery().ge(House::getId, 1L).orderBy(true, false,House::getId);
+        LambdaQueryWrapper<House> wp = Wrappers.<House>lambdaQuery().ge(House::getId, 1L).orderBy(true, false, House::getId);
         IPage<House> result = houseService.page(page, wp);
         System.out.println(result);
     }
@@ -108,6 +109,14 @@ public class HouseServiceTest {
     public void apply() {
         List<House> result = houseService.lambdaQuery().apply("date_format(create_time,'%Y-%m-%d') <= date_format({0},'%Y-%m-%d')", "2019-08-06 00:00:00").list();
         System.out.println(result);
+    }
+
+    @Test
+    public void query() {
+        RentSearch rentSearch = RentSearch.builder().start(0).size(3).cityEnName("bj").build();
+        ServiceMultiResult<HouseDTO> result = houseService.query(rentSearch);
+        System.out.println(result);
+
     }
 
 

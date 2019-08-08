@@ -298,6 +298,9 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         houses.forEach(house -> {
             HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
             houseDTO.setCover(this.cdnPrefix + house.getCover());
+
+            HouseDetail houseDetail = houseDetailService.lambdaQuery().eq(HouseDetail::getHouseId, house.getId()).one();
+            houseDTO.setHouseDetail(houseDetail);
             houseDTOS.add(houseDTO);
         });
 
