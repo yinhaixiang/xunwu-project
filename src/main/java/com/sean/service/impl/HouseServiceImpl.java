@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Maps;
 import com.sean.HouseSubscribeStatus;
 import com.sean.base.*;
 import com.sean.dao.HouseMapper;
@@ -290,21 +291,23 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         QueryWrapper<House> queryWrapper = Wrappers.<House>query()
                 .eq("status", HouseStatus.PASSES.getValue())
                 .eq("city_en_name", rentSearch.getCityEnName())
-                .orderBy(true, false, "last_update_time");
+                .orderBy(true, "asc".equals(rentSearch.getOrderDirection()), rentSearch.getOrderBy());
 
         IPage<House> housesPage = this.page(page, queryWrapper);
 
         List<House> houses = housesPage.getRecords();
 
+        List<Long> houseIds = new ArrayList<>();
+        HashMap<Long, HouseDTO> idToHouseMap = Maps.newHashMap();
         houses.forEach(house -> {
             HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
             houseDTO.setCover(this.cdnPrefix + house.getCover());
-
-            HouseDetail houseDetail = houseDetailService.lambdaQuery().eq(HouseDetail::getHouseId, house.getId()).one();
-            houseDTO.setHouseDetail(houseDetail);
             houseDTOS.add(houseDTO);
+            houseIds.add(house.getId());
+            idToHouseMap.put(house.getId(), houseDTO);
         });
 
+        wrapperHouseList(houseIds, idToHouseMap);
         return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
 
     }

@@ -113,7 +113,9 @@ public class HouseServiceTest {
 
     @Test
     public void query() {
-        RentSearch rentSearch = RentSearch.builder().start(0).size(3).cityEnName("bj").build();
+        RentSearch rentSearch = RentSearch.builder()
+                .start(0).size(3).cityEnName("bj")
+                .orderDirection("asc").orderBy("last_update_time").build();
         ServiceMultiResult<HouseDTO> result = houseService.query(rentSearch);
         System.out.println(result);
 

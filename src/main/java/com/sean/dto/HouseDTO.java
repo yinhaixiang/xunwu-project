@@ -4,6 +4,7 @@ import com.sean.entity.HouseDetail;
 import com.sean.entity.HousePicture;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -64,6 +65,13 @@ public class HouseDTO {
     private List<HousePicture> pictures;
 
     private int subscribeStatus;
+
+    public List<String> getTags() {
+        if (this.tags == null) {
+            tags = new ArrayList<>();
+        }
+        return tags;
+    }
 
 
 }

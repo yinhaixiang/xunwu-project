@@ -21,7 +21,7 @@ public class RentSearch {
     private int direction;
     private String keywords;
     private int rentWay = -1;
-    private String orderBy = "lastUpdateTime";
+    private String orderBy = "last_update_time";
     private String orderDirection = "desc";
     private int start = 0;
     private int size = 5;
