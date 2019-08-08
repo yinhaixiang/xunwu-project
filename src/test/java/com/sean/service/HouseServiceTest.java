@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.sean.base.DateUtil;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.dao.HouseMapper;
@@ -86,11 +87,10 @@ public class HouseServiceTest {
         DatatableSearch searchBody = new DatatableSearch();
         searchBody.setStart(0);
         searchBody.setLength(10);
-        Date dNow = new Date();
-        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-        Date createTimeMax = ft.parse("2019-08-06 00:00:00");
+        searchBody.setDirection("acs");
+        searchBody.setOrderBy("area");
+        searchBody.setCreateTimeMax(DateUtil.getDateYmdDate("3019-08-11"));
 
-        searchBody.setCreateTimeMax(createTimeMax);
         ServiceMultiResult<HouseDTO> result = houseService.adminQuery(searchBody);
         System.out.println(result);
     }

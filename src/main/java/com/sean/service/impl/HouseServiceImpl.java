@@ -283,16 +283,26 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public ServiceMultiResult<HouseDTO> query(RentSearch rentSearch) {
-        if (rentSearch.getKeywords() != null && !rentSearch.getKeywords().isEmpty()) {
-            ServiceMultiResult<Long> serviceResult = searchService.query(rentSearch);
-            if (serviceResult.getTotal() == 0) {
-                return new ServiceMultiResult<>(0, new ArrayList<>());
-            }
+        List<HouseDTO> houseDTOS = new ArrayList<>();
+        Page<House> page = new Page<House>(rentSearch.getStart() / rentSearch.getSize() + 1,
+                rentSearch.getSize());
 
-            return new ServiceMultiResult<HouseDTO>(serviceResult.getTotal(), wrapperHouseResult(serviceResult.getResult()));
-        }
+        QueryWrapper<House> queryWrapper = Wrappers.<House>query()
+                .eq("status", HouseStatus.PASSES.getValue())
+                .eq("city_en_name", rentSearch.getCityEnName());
 
-        return simpleQuery(rentSearch);
+        IPage<House> housesPage = this.page(page, queryWrapper);
+
+        List<House> houses = housesPage.getRecords();
+
+        houses.forEach(house -> {
+            HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
+            houseDTO.setCover(this.cdnPrefix + house.getCover());
+            houseDTOS.add(houseDTO);
+        });
+
+        return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
+
     }
 
     @Override

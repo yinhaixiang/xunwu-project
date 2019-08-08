@@ -11,10 +11,6 @@ import java.util.Date;
 public class TT {
 
     public static void main(String args[]) throws ParseException {
-        String s1 = "";
-        String s2 = null;
-
-        System.out.println(StringUtils.isEmpty(s1));
-        System.out.println(StringUtils.isEmpty(s2));
+        System.out.println(DateUtil.getDateYmdDate("2099-08-11"));
     }
 }
