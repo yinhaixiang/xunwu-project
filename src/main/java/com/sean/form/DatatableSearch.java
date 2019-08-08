@@ -37,4 +37,13 @@ public class DatatableSearch {
     private String orderBy;
 
 
+    public String getOrderBy() {
+        if ("createTime".equals(orderBy)) {
+            return "create_time";
+        }
+        if ("watchTimes".equals(orderBy)) {
+            return "watch_times";
+        }
+        return orderBy;
+    }
 }

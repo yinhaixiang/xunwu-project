@@ -142,13 +142,6 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         Page<House> page = new Page<House>(searchBody.getStart() / searchBody.getLength() + 1,
                 searchBody.getLength());
 
-        // 为了排序时用
-        if ("createTime".equals(searchBody.getOrderBy())) {
-            searchBody.setOrderBy("create_time");
-        } else if ("watchTimes".equals(searchBody.getOrderBy())) {
-            searchBody.setOrderBy("watch_times");
-        }
-
         QueryWrapper<House> queryWrapper = Wrappers.<House>query()
                 .eq("admin_id", LoginUserUtil.getLoginUserId())
                 .ne("status", HouseStatus.DELETED.getValue())
