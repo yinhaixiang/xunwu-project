@@ -293,6 +293,10 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
                 .eq("city_en_name", rentSearch.getCityEnName())
                 .orderBy(true, "asc".equals(rentSearch.getOrderDirection()), rentSearch.getOrderBy());
 
+        if ("distance_to_subway".equals(rentSearch.getOrderBy())) {
+            queryWrapper.gt("distance_to_subway", -1);
+        }
+
         IPage<House> housesPage = this.page(page, queryWrapper);
 
         List<House> houses = housesPage.getRecords();

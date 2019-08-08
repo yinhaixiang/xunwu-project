@@ -50,5 +50,11 @@ public class RentSearch {
         }
     }
 
+    public String getOrderBy() {
+        if ("distanceToSubway".equals(orderBy)) {
+            return "distance_to_subway";
+        }
+        return orderBy;
+    }
 
 }
