@@ -289,7 +289,8 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
         QueryWrapper<House> queryWrapper = Wrappers.<House>query()
                 .eq("status", HouseStatus.PASSES.getValue())
-                .eq("city_en_name", rentSearch.getCityEnName());
+                .eq("city_en_name", rentSearch.getCityEnName())
+                .orderBy(true, false, "last_update_time");
 
         IPage<House> housesPage = this.page(page, queryWrapper);
 
