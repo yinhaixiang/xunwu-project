@@ -12,11 +12,9 @@ import com.sean.service.IHouseDetailService;
 import com.sean.service.IHouseService;
 import com.sean.service.IHouseTagService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.lucene.search.TotalHits;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
@@ -26,9 +24,7 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
-import org.elasticsearch.index.reindex.DeleteByQueryAction;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
-import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.modelmapper.ModelMapper;
@@ -149,7 +145,6 @@ public class SearchServiceImpl implements ISearchService {
     }
 
     private boolean deleteAndCreate(long totalHit, HouseIndexTemplate indexTemplate) {
-
         try {
             DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(INDEX_NAME);
             deleteByQueryRequest.setConflicts("proceed");
@@ -178,6 +173,22 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public void remove(Long houseId) {
+        try {
+            DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(INDEX_NAME);
+            deleteByQueryRequest.setConflicts("proceed");
+            deleteByQueryRequest.setQuery(new TermQueryBuilder(HouseIndexKey.HOUSE_ID, houseId));
+
+            log.debug("Delete by query for house: " + deleteByQueryRequest);
+
+            BulkByScrollResponse bulkByScrollResponse = esClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+
+            log.debug("bulkByScrollResponse: {}", bulkByScrollResponse);
+
+            long deleted = bulkByScrollResponse.getDeleted();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 

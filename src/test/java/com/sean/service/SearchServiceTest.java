@@ -27,21 +27,17 @@ public class SearchServiceTest {
 
 
     @Test
-    public void create() {
+    public void index() {
         searchService.index(17L);
     }
 
 
     @Test
-    public void update() {
-
+    public void remove() {
+        searchService.remove(17L);
     }
 
 
-    @Test
-    public void deleteAndCreate() {
-
-    }
 
 
 }
