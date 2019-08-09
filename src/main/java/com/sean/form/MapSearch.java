@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 public class MapSearch {
     private String cityEnName;
 
@@ -37,6 +36,7 @@ public class MapSearch {
     public int getStart() {
         return start < 0 ? 0 : start;
     }
+
     public int getSize() {
         return size > 100 ? 100 : size;
     }
