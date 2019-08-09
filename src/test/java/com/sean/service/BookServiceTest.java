@@ -28,7 +28,6 @@ public class BookServiceTest {
     @Test
     public void addBook() {
         BookVO book = new BookVO();
-        book.setId("177");
         book.setType("Y");
         book.setAuthor("aa");
         book.setWordCount(123);
