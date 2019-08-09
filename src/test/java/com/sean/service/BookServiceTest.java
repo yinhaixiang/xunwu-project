@@ -3,6 +3,11 @@ package com.sean.service;
 import com.sean.esdemo.BookService;
 import com.sean.esdemo.BookVO;
 import com.sean.esdemo.BoolQueryVO;
+import org.elasticsearch.action.delete.DeleteResponse;
+import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.update.UpdateResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +28,19 @@ public class BookServiceTest {
     @Test
     public void addBook() {
         BookVO book = new BookVO();
+        book.setId("177");
         book.setType("Y");
         book.setAuthor("aa");
         book.setWordCount(123);
-        book.setTitle("bbb");
+        book.setTitle("ccc");
         book.setPublishDate("2019-09-09");
-        String result = bookService.addBook(book);
+        IndexResponse result = bookService.addBook(book);
         System.out.println(result);
     }
 
     @Test
     public void get() {
-        String result = bookService.findBookById("1");
+        GetResponse result = bookService.findBookById("1");
         System.out.println(result);
     }
 
@@ -48,14 +54,14 @@ public class BookServiceTest {
         book.setWordCount(123);
         book.setTitle("bbb");
         book.setPublishDate("2019-09-09");
-        String result = bookService.update(book);
+        UpdateResponse result = bookService.update(book);
         System.out.println(result);
     }
 
 
     @Test
     public void delete() {
-        String result = bookService.delete("4");
+        DeleteResponse result = bookService.delete("6");
         System.out.println(result);
     }
 
@@ -67,7 +73,7 @@ public class BookServiceTest {
         BoolQueryVO boolQueryVO = new BoolQueryVO();
         boolQueryVO.setAuthor("孙悟空");
         boolQueryVO.setTitle("大圣");
-        String result = bookService.boolQuery(boolQueryVO);
+        SearchResponse result = bookService.boolQuery(boolQueryVO);
         System.out.println(result);
     }
 

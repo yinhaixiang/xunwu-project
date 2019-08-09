@@ -33,12 +33,11 @@ public class BookService {
     @Resource
     private RestHighLevelClient client;
 
-    public String findBookById(String id) {
+    public GetResponse findBookById(String id) {
         GetRequest request = new GetRequest("book", id);
         try {
             GetResponse response = client.get(request, RequestOptions.DEFAULT);
-            Map<String, Object> resultMap = response.getSource();
-            return resultMap.toString();
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -46,7 +45,7 @@ public class BookService {
     }
 
 
-    public String addBook(BookVO vo) {
+    public IndexResponse addBook(BookVO vo) {
         try {
             XContentBuilder content = XContentFactory.jsonBuilder().startObject()
                     .field("type", vo.getType())
@@ -57,7 +56,7 @@ public class BookService {
                     .endObject();
             IndexRequest request = new IndexRequest("book").source(content);
             IndexResponse response = client.index(request, RequestOptions.DEFAULT);
-            return response.toString();
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,7 +64,7 @@ public class BookService {
     }
 
 
-    public String update(BookVO vo) {
+    public UpdateResponse update(BookVO vo) {
         try {
             UpdateRequest request = new UpdateRequest("book", vo.getId());
             XContentBuilder content = XContentFactory.jsonBuilder().startObject()
@@ -77,7 +76,7 @@ public class BookService {
                     .endObject();
             request.doc(content);
             UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
-            return response.toString();
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -85,11 +84,11 @@ public class BookService {
     }
 
 
-    public String delete(String id) {
+    public DeleteResponse delete(String id) {
         try {
             DeleteRequest request = new DeleteRequest("book").id(id);
             DeleteResponse response = client.delete(request, RequestOptions.DEFAULT);
-            return response.toString();
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -97,7 +96,7 @@ public class BookService {
     }
 
 
-    public String boolQuery(BoolQueryVO vo) {
+    public SearchResponse boolQuery(BoolQueryVO vo) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
         if (!StringUtils.isEmpty(vo.getAuthor())) {
             boolQuery.must(QueryBuilders.matchQuery("author", vo.getAuthor()));
@@ -114,10 +113,10 @@ public class BookService {
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         try {
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-            return response.toString();
+            return response;
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return null;
     }
 }
