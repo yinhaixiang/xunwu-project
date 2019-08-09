@@ -8,6 +8,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateResponse;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +30,9 @@ public class BookServiceTest {
     public void addBook() {
         BookVO book = new BookVO();
         book.setType("Y");
-        book.setAuthor("aa");
+        book.setAuthor("sean");
         book.setWord_count(123);
-        book.setTitle("eee");
+        book.setTitle("abc");
         book.setPublish_date("2019-09-09");
         IndexResponse result = bookService.addBook(book);
         System.out.println(result);
@@ -51,7 +52,7 @@ public class BookServiceTest {
         book.setType("Y");
         book.setAuthor("aa");
         book.setWord_count(123);
-        book.setTitle("你好");
+        book.setTitle("你好222");
         book.setPublish_date("2019-09-09");
         UpdateResponse result = bookService.update(book);
         System.out.println(result);
@@ -60,7 +61,7 @@ public class BookServiceTest {
 
     @Test
     public void delete() {
-        DeleteResponse result = bookService.delete("6");
+        BulkByScrollResponse result = bookService.delete("sBJVcWwBds2BkCOSeDXP");
         System.out.println(result);
     }
 

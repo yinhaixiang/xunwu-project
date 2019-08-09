@@ -2,8 +2,6 @@ package com.sean.esdemo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.delete.DeleteRequest;
-import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -18,6 +16,9 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ import java.io.IOException;
 @Service
 public class BookService {
     @Resource
-    private RestHighLevelClient client;
+    private RestHighLevelClient esClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -42,7 +43,7 @@ public class BookService {
     public GetResponse findBookById(String id) {
         GetRequest request = new GetRequest("book", id);
         try {
-            GetResponse response = client.get(request, RequestOptions.DEFAULT);
+            GetResponse response = esClient.get(request, RequestOptions.DEFAULT);
             return response;
         } catch (IOException e) {
             e.printStackTrace();
@@ -64,8 +65,8 @@ public class BookService {
 //            IndexRequest request = new IndexRequest("book").source(content);
 
             IndexRequest request = new IndexRequest("book").source(objectMapper.writeValueAsBytes(vo), XContentType.JSON);
-            log.info(request.sourceAsMap().toString());
-            IndexResponse response = client.index(request, RequestOptions.DEFAULT);
+            log.warn(request.sourceAsMap().toString());
+            IndexResponse response = esClient.index(request, RequestOptions.DEFAULT);
             return response;
         } catch (IOException e) {
             e.printStackTrace();
@@ -88,7 +89,7 @@ public class BookService {
 //            request.doc(content);
 
             request.doc(objectMapper.writeValueAsBytes(vo), XContentType.JSON);
-            UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
+            UpdateResponse response = esClient.update(request, RequestOptions.DEFAULT);
 
             return response;
         } catch (IOException e) {
@@ -98,11 +99,20 @@ public class BookService {
     }
 
 
-    public DeleteResponse delete(String id) {
+    public BulkByScrollResponse delete(String id) {
         try {
-            DeleteRequest request = new DeleteRequest("book").id(id);
-            DeleteResponse response = client.delete(request, RequestOptions.DEFAULT);
-            return response;
+            // 两种形式都可以
+//            DeleteRequest request = new DeleteRequest("book").id(id);
+//            DeleteResponse response = esClient.delete(request, RequestOptions.DEFAULT);
+//            return response;
+
+            DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest("book");
+            deleteByQueryRequest.setConflicts("proceed");
+            deleteByQueryRequest.setQuery(new TermQueryBuilder("_id", id));
+
+            BulkByScrollResponse bulkResponse =
+                    esClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+            return bulkResponse;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -127,7 +137,7 @@ public class BookService {
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
         log.warn("searchSourceBuilder: {}", searchSourceBuilder);
         try {
-            SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
             for (SearchHit hit : response.getHits()) {
                 System.out.println(hit.getSourceAsMap());
                 System.out.println(hit.getSourceAsString());
