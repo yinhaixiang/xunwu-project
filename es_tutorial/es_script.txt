@@ -1,7 +1,14 @@
-# 检查集群健康
 GET _cluster/health
 
-# 创建people索引
+POST book/_mappings
+{
+  "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+}
+
 PUT people
 {
   "settings": {
@@ -146,16 +153,176 @@ POST book/_search
   }
 }
 
+## 普通匹配
+POST book/_search
+{
+  "query": {
+    "match": {
+      "title": "ES入门"
+    }
+  }
+}
+
+# 习语匹配
+POST book/_search
+{
+  "query": {
+    "match_phrase": {
+      "author": "ES入门"
+    }
+  }
+}
 
 
 
+# 多字段匹配
+POST book/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "ES",
+      "fields": ["author", "title"]
+    }
+  }
+}
 
 
+# 语法匹配
+POST book/_search
+{
+  "query": {
+    "query_string": {
+      "query": "(ES AND 入门) OR bbb"
+    }
+  }
+}
+
+# term查询
+POST book/_search
+{
+  "query": {
+    "term": {
+      "author": "aa"
+    }
+  }
+}
+
+# 范围查询
+POST book/_search
+{
+  "query": {
+    "range": {
+      "word_count": {
+        "gte": 100,
+        "lte": 20000
+      }
+    }
+  }
+}
+
+# 日期范围查询
+POST book/_search
+{
+  "query": {
+    "range": {
+      "publish_date": {
+        "gte": "2017-01-01",
+        "lte": "now"
+      }
+    }
+  }
+}
+
+# filter查询
+POST book/_search
+{
+  "query": {
+    "bool": {
+      "filter": {
+        "term": {
+          "word_count": 5000
+        }
+      }
+    }
+  }
+}
+
+# 固定分数查询
+POST book/_search
+{
+  "query": {
+    "constant_score": {
+      "filter": {
+        "match": {
+          "title": "ES"
+        }
+      },
+      "boost": 777
+    }
+  }
+}
 
 
+# should查询
+POST book/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "author": "sean"
+          }
+        },
+        {
+          "match": {
+            "title": "ES"
+          }
+        }
+      ]
+    }
+  }
+}
+
+# must查询
+POST book/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "author": "sean"
+          }
+        },
+        {
+          "match": {
+            "title": "ES"
+          }
+        }
+      ],
+      "filter": {
+        "term": {
+          "word_count": 123
+        }
+      }
+    }
+  }
+}
 
 
-
-
+# must not查询
+POST book/_search
+{
+  "query": {
+    "bool": {
+      "must_not": {
+        "term": {
+          "title": "ES"
+        }
+      }
+    }
+  }
+}
 
 
