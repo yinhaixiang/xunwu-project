@@ -1,6 +1,5 @@
 package com.sean.search;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
@@ -11,23 +10,17 @@ import com.sean.service.IHouseService;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.reindex.BulkByScrollResponse;
-import org.elasticsearch.index.reindex.DeleteByQueryAction;
-import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -73,30 +66,28 @@ public class SearchServiceImpl implements ISearchService {
                 return false;
             }
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("Error to index house " + indexTemplate.getHouseId(), e);
             return false;
         }
     }
 
     private boolean update(String esId, HouseIndexTemplate indexTemplate) {
-        return false;
-//        try {
-//
-//
-//
-//            UpdateResponse response = this.esClient.prepareUpdate(INDEX_NAME, INDEX_TYPE, esId).setDoc(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON).get();
-//
-//            log.debug("Update index with house: " + indexTemplate.getHouseId());
-//            if (response.status() == RestStatus.OK) {
-//                return true;
-//            } else {
-//                return false;
-//            }
-//        } catch (JsonProcessingException e) {
-//            logger.error("Error to index house " + indexTemplate.getHouseId(), e);
-//            return false;
-//        }
+        try {
+            UpdateRequest request = new UpdateRequest(INDEX_NAME, esId);
+            request.doc(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
+            UpdateResponse response = this.client.update(request, RequestOptions.DEFAULT);
+
+            log.debug("Update index with house: " + indexTemplate.getHouseId());
+            if (response.status() == RestStatus.OK) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            log.error("Error to index house " + indexTemplate.getHouseId(), e);
+            return false;
+        }
     }
 
     private boolean deleteAndCreate(long totalHit, HouseIndexTemplate indexTemplate) {

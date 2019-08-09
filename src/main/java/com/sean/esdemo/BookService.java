@@ -79,15 +79,19 @@ public class BookService {
     public UpdateResponse update(BookVO vo) {
         try {
             UpdateRequest request = new UpdateRequest("book", vo.getId());
-            XContentBuilder content = XContentFactory.jsonBuilder().startObject()
-                    .field("type", vo.getType())
-                    .field("word_count", vo.getWord_count())
-                    .field("author", vo.getAuthor())
-                    .field("title", vo.getTitle())
-                    .timeField("publish_date", vo.getPublish_date())
-                    .endObject();
-            request.doc(content);
+            // 两种形式都可以
+//            XContentBuilder content = XContentFactory.jsonBuilder().startObject()
+//                    .field("type", vo.getType())
+//                    .field("word_count", vo.getWord_count())
+//                    .field("author", vo.getAuthor())
+//                    .field("title", vo.getTitle())
+//                    .timeField("publish_date", vo.getPublish_date())
+//                    .endObject();
+//            request.doc(content);
+
+            request.doc(objectMapper.writeValueAsBytes(vo), XContentType.JSON);
             UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
+
             return response;
         } catch (IOException e) {
             e.printStackTrace();
