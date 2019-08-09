@@ -30,9 +30,9 @@ public class BookServiceTest {
         BookVO book = new BookVO();
         book.setType("Y");
         book.setAuthor("aa");
-        book.setWordCount(123);
-        book.setTitle("ccc");
-        book.setPublishDate("2019-09-09");
+        book.setWord_count(123);
+        book.setTitle("eee");
+        book.setPublish_date("2019-09-09");
         IndexResponse result = bookService.addBook(book);
         System.out.println(result);
     }
@@ -50,9 +50,9 @@ public class BookServiceTest {
         book.setId("1");
         book.setType("Y");
         book.setAuthor("aa");
-        book.setWordCount(123);
+        book.setWord_count(123);
         book.setTitle("bbb");
-        book.setPublishDate("2019-09-09");
+        book.setPublish_date("2019-09-09");
         UpdateResponse result = bookService.update(book);
         System.out.println(result);
     }

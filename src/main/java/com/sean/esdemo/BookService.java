@@ -1,6 +1,6 @@
 package com.sean.esdemo;
 
-import lombok.extern.java.Log;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
@@ -16,17 +16,18 @@ import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * es接口
@@ -36,6 +37,9 @@ import java.util.Map;
 public class BookService {
     @Resource
     private RestHighLevelClient client;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public GetResponse findBookById(String id) {
         GetRequest request = new GetRequest("book", id);
@@ -51,14 +55,18 @@ public class BookService {
 
     public IndexResponse addBook(BookVO vo) {
         try {
-            XContentBuilder content = XContentFactory.jsonBuilder().startObject()
-                    .field("type", vo.getType())
-                    .field("word_count", vo.getWordCount())
-                    .field("author", vo.getAuthor())
-                    .field("title", vo.getTitle())
-                    .timeField("publish_date", vo.getPublishDate())
-                    .endObject();
-            IndexRequest request = new IndexRequest("book").source(content);
+            // 两种形式都可以
+//            XContentBuilder content = XContentFactory.jsonBuilder().startObject()
+//                    .field("type", vo.getType())
+//                    .field("word_count", vo.getWord_count())
+//                    .field("author", vo.getAuthor())
+//                    .field("title", vo.getTitle())
+//                    .timeField("publish_date", vo.getPublish_date())
+//                    .endObject();
+//            IndexRequest request = new IndexRequest("book").source(content);
+
+            IndexRequest request = new IndexRequest("book").source(objectMapper.writeValueAsBytes(vo), XContentType.JSON);
+            log.info(request.sourceAsMap().toString());
             IndexResponse response = client.index(request, RequestOptions.DEFAULT);
             return response;
         } catch (IOException e) {
@@ -73,10 +81,10 @@ public class BookService {
             UpdateRequest request = new UpdateRequest("book", vo.getId());
             XContentBuilder content = XContentFactory.jsonBuilder().startObject()
                     .field("type", vo.getType())
-                    .field("word_count", vo.getWordCount())
+                    .field("word_count", vo.getWord_count())
                     .field("author", vo.getAuthor())
                     .field("title", vo.getTitle())
-                    .timeField("publish_date", vo.getPublishDate())
+                    .timeField("publish_date", vo.getPublish_date())
                     .endObject();
             request.doc(content);
             UpdateResponse response = client.update(request, RequestOptions.DEFAULT);

@@ -10,8 +10,8 @@ import lombok.Data;
 public class BookVO {
     private String id;
     private String type;
-    private Integer wordCount;
+    private Integer word_count;
     private String author;
     private String title;
-    private String publishDate;
+    private String publish_date;
 }
