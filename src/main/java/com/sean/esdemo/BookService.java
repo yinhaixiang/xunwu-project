@@ -26,13 +26,25 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * @author Zereao
- * @version 2019/05/15 19:55
+ * es接口
  */
 @Service
 public class BookService {
     @Resource
     private RestHighLevelClient client;
+
+    public String findBookById(String id) {
+        GetRequest request = new GetRequest("book", id);
+        try {
+            GetResponse response = client.get(request, RequestOptions.DEFAULT);
+            Map<String, Object> resultMap = response.getSource();
+            return resultMap.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 
     public String addBook(BookVO vo) {
         try {
@@ -52,17 +64,6 @@ public class BookService {
         return null;
     }
 
-    public String findBookById(String id) {
-        GetRequest request = new GetRequest("book", id);
-        try {
-            GetResponse response = client.get(request, RequestOptions.DEFAULT);
-            Map<String, Object> resultMap = response.getSource();
-            return resultMap.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     public String update(BookVO vo) {
         try {
@@ -83,6 +84,7 @@ public class BookService {
         return null;
     }
 
+
     public String delete(String id) {
         try {
             DeleteRequest request = new DeleteRequest("book").id(id);
@@ -93,6 +95,7 @@ public class BookService {
         }
         return null;
     }
+
 
     public String boolQuery(BoolQueryVO vo) {
         BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
