@@ -1,0 +1,178 @@
+# =======================  造一批数据  =======================
+
+### 首先创建一个book索引
+PUT http://localhost:9200/book
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 1
+  },
+  "mappings": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "word_count": {
+        "type": "integer"
+      },
+      "author": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text"
+      },
+      "publish_date": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+      }
+    }
+  }
+}
+
+### book 索引创建完毕后，插入一批数据。下面总共插入了 12 条数据，ID为 1 - 12
+PUT http://localhost:9200/book/_doc/1
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 5000,
+  "author": "张三丰",
+  "title": "黄小小转圈圈",
+  "publish_date": "1990-12-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/2
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 12390,
+  "author": "张三",
+  "title": "三国演义",
+  "publish_date": "1920-11-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/3
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 21321,
+  "author": "李四",
+  "title": "张小凡传",
+  "publish_date": "1942-08-22"
+}
+
+###
+PUT http://localhost:9200/book/_doc/4
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 43231,
+  "author": "张小凡",
+  "title": "李四传奇",
+  "publish_date": "1993-09-14"
+}
+
+###
+PUT http://localhost:9200/book/_doc/5
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 9999,
+  "author": "Zereao",
+  "title": "ES入门",
+  "publish_date": "1995-11-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/6
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 9800,
+  "author": "霍骁爱",
+  "title": "张玲玲随笔",
+  "publish_date": "1985-01-25"
+}
+
+###
+PUT http://localhost:9200/book/_doc/7
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 2456,
+  "author": "凌凌漆",
+  "title": "大内密探",
+  "publish_date": "1920-10-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/8
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 8900,
+  "author": "王五",
+  "title": "西游记事",
+  "publish_date": "1897-11-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/9
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 5000,
+  "author": "李晓霞",
+  "title": "灵玲零",
+  "publish_date": "1978-09-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/10
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 5000,
+  "author": "孙悟空",
+  "title": "七天大圣",
+  "publish_date": "1890-12-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/11
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 8907,
+  "author": "余花花",
+  "title": "第九天",
+  "publish_date": "2000-12-27"
+}
+
+###
+PUT http://localhost:9200/book/_doc/12
+Content-Type: application/json
+
+{
+  "type": "novel",
+  "word_count": 8977,
+  "author": "牛小娟",
+  "title": "千克一律",
+  "publish_date": "2018-12-27"
+}
+
+###

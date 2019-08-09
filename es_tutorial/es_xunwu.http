@@ -1,0 +1,76 @@
+###  创建一个新的 xunwu 索引
+PUT http://localhost:9200/xunwu
+Content-Type: application/json
+
+{
+  "settings": {
+    "number_of_shards": 5,
+    "number_of_replicas": 0
+  },
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "price": {
+        "type": "integer"
+      },
+      "area": {
+        "type": "integer"
+      },
+      "createTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+      },
+      "lastUpdateTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss || yyyy-MM-dd || epoch_millis"
+      },
+      "cityEnName": {
+        "type": "keyword"
+      },
+      "regionEnName": {
+        "type": "keyword"
+      },
+      "direction": {
+        "type": "integer"
+      },
+      "distanceToSubway": {
+        "type": "integer"
+      },
+      "subwayLineName": {
+        "type": "keyword"
+      },
+      "subwayStationName": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "text"
+      },
+      "street": {
+        "type": "keyword"
+      },
+      "district": {
+        "type": "keyword"
+      },
+      "description": {
+        "type": "text"
+      },
+      "layoutDesc": {
+        "type": "text"
+      },
+      "traffic": {
+        "type": "text"
+      },
+      "roundService": {
+        "type": "text"
+      },
+      "rentWay": {
+        "type": "integer"
+      }
+    }
+  }
+}
+
+###
