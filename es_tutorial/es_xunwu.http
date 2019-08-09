@@ -10,6 +10,9 @@ Content-Type: application/json
   "mappings": {
     "dynamic": false,
     "properties": {
+      "houseId": {
+        "type": "long"
+      },
       "title": {
         "type": "text"
       },
