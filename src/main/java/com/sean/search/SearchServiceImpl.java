@@ -15,12 +15,19 @@ import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.index.reindex.BulkByScrollResponse;
+import org.elasticsearch.index.reindex.DeleteByQueryAction;
+import org.elasticsearch.index.reindex.DeleteByQueryRequest;
+import org.elasticsearch.index.reindex.DeleteByQueryRequestBuilder;
 import org.elasticsearch.rest.RestStatus;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -36,7 +43,7 @@ public class SearchServiceImpl implements ISearchService {
     private ModelMapper modelMapper;
 
     @Resource
-    private RestHighLevelClient client;
+    private RestHighLevelClient esClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -59,7 +66,7 @@ public class SearchServiceImpl implements ISearchService {
         try {
             IndexRequest request = new IndexRequest(INDEX_NAME).source(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
             log.debug("source: {}", request.sourceAsMap());
-            IndexResponse response = client.index(request, RequestOptions.DEFAULT);
+            IndexResponse response = esClient.index(request, RequestOptions.DEFAULT);
             if (response.status() == RestStatus.CREATED) {
                 return true;
             } else {
@@ -76,7 +83,7 @@ public class SearchServiceImpl implements ISearchService {
         try {
             UpdateRequest request = new UpdateRequest(INDEX_NAME, esId);
             request.doc(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
-            UpdateResponse response = this.client.update(request, RequestOptions.DEFAULT);
+            UpdateResponse response = this.esClient.update(request, RequestOptions.DEFAULT);
 
             log.debug("Update index with house: " + indexTemplate.getHouseId());
             if (response.status() == RestStatus.OK) {
@@ -91,22 +98,29 @@ public class SearchServiceImpl implements ISearchService {
     }
 
     private boolean deleteAndCreate(long totalHit, HouseIndexTemplate indexTemplate) {
-//        DeleteByQueryRequestBuilder builder = DeleteByQueryAction.INSTANCE
-//                .newRequestBuilder(esClient)
-//                .filter(QueryBuilders.termQuery(HouseIndexKey.HOUSE_ID, indexTemplate.getHouseId()))
-//                .source(INDEX_NAME);
-//
-//        logger.debug("Delete by query for house: " + builder);
-//
-//        BulkByScrollResponse response = builder.get();
-//        long deleted = response.getDeleted();
-//        if (deleted != totalHit) {
-//            logger.warn("Need delete {}, but {} was deleted!", totalHit, deleted);
-//            return false;
-//        } else {
-//            return create(indexTemplate);
-//        }
-        return true;
+
+        try {
+            DeleteByQueryRequest deleteByQueryRequest = new DeleteByQueryRequest(INDEX_NAME);
+            deleteByQueryRequest.setConflicts("proceed");
+            deleteByQueryRequest.setQuery(new TermQueryBuilder(HouseIndexKey.HOUSE_ID, indexTemplate.getHouseId()));
+
+
+            log.debug("Delete by query for house: " + deleteByQueryRequest);
+
+            BulkByScrollResponse bulkResponse =
+                    esClient.deleteByQuery(deleteByQueryRequest, RequestOptions.DEFAULT);
+
+            long deleted = bulkResponse.getDeleted();
+            if (deleted != totalHit) {
+                log.warn("Need delete {}, but {} was deleted!", totalHit, deleted);
+                return false;
+            } else {
+                return create(indexTemplate);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
 
