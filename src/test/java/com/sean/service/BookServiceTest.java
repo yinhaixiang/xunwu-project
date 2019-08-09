@@ -72,6 +72,8 @@ public class BookServiceTest {
         BoolQueryVO boolQueryVO = new BoolQueryVO();
         boolQueryVO.setAuthor("孙悟空");
         boolQueryVO.setTitle("大圣");
+        boolQueryVO.setGtWordCount(20);
+        boolQueryVO.setLtWordCount(10000);
         SearchResponse result = bookService.boolQuery(boolQueryVO);
         System.out.println(result);
     }

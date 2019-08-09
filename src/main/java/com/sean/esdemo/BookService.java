@@ -1,5 +1,7 @@
 package com.sean.esdemo;
 
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequest;
@@ -28,6 +30,7 @@ import java.util.Map;
 /**
  * es接口
  */
+@Slf4j
 @Service
 public class BookService {
     @Resource
@@ -111,6 +114,7 @@ public class BookService {
         }
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQuery);
         SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
+        log.warn("searchSourceBuilder: {}", searchSourceBuilder);
         try {
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
             return response;
