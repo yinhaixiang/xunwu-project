@@ -65,6 +65,7 @@ public class SearchServiceImpl implements ISearchService {
     private boolean create(HouseIndexTemplate indexTemplate) {
         try {
             IndexRequest request = new IndexRequest(INDEX_NAME).source(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
+            log.debug("source: {}", request.sourceAsMap());
             IndexResponse response = client.index(request, RequestOptions.DEFAULT);
             if (response.status() == RestStatus.CREATED) {
                 return true;
@@ -73,20 +74,20 @@ public class SearchServiceImpl implements ISearchService {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("Error to index house " + indexTemplate.getHouseId(), e);
+            return false;
         }
-        return false;
     }
 
     private boolean update(String esId, HouseIndexTemplate indexTemplate) {
-//        if (!updateSuggest(indexTemplate)) {
-//            return false;
-//        }
-//
+        return false;
 //        try {
+//
+//
+//
 //            UpdateResponse response = this.esClient.prepareUpdate(INDEX_NAME, INDEX_TYPE, esId).setDoc(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON).get();
 //
-//            logger.debug("Update index with house: " + indexTemplate.getHouseId());
+//            log.debug("Update index with house: " + indexTemplate.getHouseId());
 //            if (response.status() == RestStatus.OK) {
 //                return true;
 //            } else {
@@ -96,7 +97,6 @@ public class SearchServiceImpl implements ISearchService {
 //            logger.error("Error to index house " + indexTemplate.getHouseId(), e);
 //            return false;
 //        }
-        return true;
     }
 
     private boolean deleteAndCreate(long totalHit, HouseIndexTemplate indexTemplate) {

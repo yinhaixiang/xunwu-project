@@ -51,7 +51,7 @@ public class BookServiceTest {
         book.setType("Y");
         book.setAuthor("aa");
         book.setWord_count(123);
-        book.setTitle("bbb");
+        book.setTitle("abc");
         book.setPublish_date("2019-09-09");
         UpdateResponse result = bookService.update(book);
         System.out.println(result);
