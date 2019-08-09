@@ -19,6 +19,7 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -117,6 +118,10 @@ public class BookService {
         log.warn("searchSourceBuilder: {}", searchSourceBuilder);
         try {
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+            for (SearchHit hit : response.getHits()) {
+                System.out.println(hit.getSourceAsMap());
+                System.out.println(hit.getSourceAsString());
+            }
             return response;
         } catch (IOException e) {
             e.printStackTrace();
