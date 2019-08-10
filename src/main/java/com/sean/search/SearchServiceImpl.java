@@ -3,6 +3,7 @@ package com.sean.search;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.primitives.Longs;
+import com.sean.base.RentValueBlock;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.entity.House;
@@ -25,6 +26,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
@@ -281,6 +283,51 @@ public class SearchServiceImpl implements ISearchService {
             if (rentSearch.getRegionEnName() != null && !"*".equals(rentSearch.getRegionEnName())) {
                 boolQuery.filter(QueryBuilders.termQuery(HouseIndexKey.REGION_EN_NAME, rentSearch.getRegionEnName()));
             }
+
+            RentValueBlock area = RentValueBlock.matchArea(rentSearch.getAreaBlock());
+            if (!RentValueBlock.ALL.equals(area)) {
+                RangeQueryBuilder rangeQueryBuilder = QueryBuilders.rangeQuery(HouseIndexKey.AREA);
+                if (area.getMax() > 0) {
+                    rangeQueryBuilder.lte(area.getMax());
+                }
+                if (area.getMin() > 0) {
+                    rangeQueryBuilder.gte(area.getMin());
+                }
+                boolQuery.filter(rangeQueryBuilder);
+            }
+
+            RentValueBlock price = RentValueBlock.matchPrice(rentSearch.getPriceBlock());
+            if (!RentValueBlock.ALL.equals(price)) {
+                RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery(HouseIndexKey.PRICE);
+                if (price.getMax() > 0) {
+                    rangeQuery.lte(price.getMax());
+                }
+                if (price.getMin() > 0) {
+                    rangeQuery.gte(price.getMin());
+                }
+                boolQuery.filter(rangeQuery);
+            }
+
+            if (rentSearch.getDirection() > 0) {
+                boolQuery.filter(
+                        QueryBuilders.termQuery(HouseIndexKey.DIRECTION, rentSearch.getDirection())
+                );
+            }
+
+            if (rentSearch.getRentWay() > -1) {
+                boolQuery.filter(
+                        QueryBuilders.termQuery(HouseIndexKey.RENT_WAY, rentSearch.getRentWay())
+                );
+            }
+            boolQuery.must(
+                    QueryBuilders.multiMatchQuery(rentSearch.getKeywords(),
+                            HouseIndexKey.TITLE,
+                            HouseIndexKey.TRAFFIC,
+                            HouseIndexKey.DISTRICT,
+                            HouseIndexKey.ROUND_SERVICE,
+                            HouseIndexKey.SUBWAY_LINE_NAME,
+                            HouseIndexKey.SUBWAY_STATION_NAME
+                    ));
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQuery);
             searchSourceBuilder.sort(
