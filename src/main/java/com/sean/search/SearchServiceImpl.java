@@ -307,7 +307,7 @@ public class SearchServiceImpl implements ISearchService {
             return new ServiceMultiResult<Long>(response.getHits().getHits().length, houseIds);
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            return new ServiceMultiResult<>(0, null);
         }
     }
 
