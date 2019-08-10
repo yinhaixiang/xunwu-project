@@ -14,6 +14,7 @@ import com.sean.dao.HouseMapper;
 import com.sean.dto.HouseDTO;
 import com.sean.entity.*;
 import com.sean.form.*;
+import com.sean.search.ISearchService;
 import com.sean.service.*;
 import javafx.util.Pair;
 import org.modelmapper.ModelMapper;
@@ -50,6 +51,9 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Autowired
     private IHouseSubscribeService houseSubscribeService;
+
+    @Autowired
+    private ISearchService searchService;
 
     @Value("${cdn_prefix}")
     private String cdnPrefix;
@@ -128,10 +132,10 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
         house.setLastUpdateTime(new Date());
         this.updateById(house);
 
-        // TODO 引入es
-//        if (house.getStatus() == HouseStatus.PASSES.getValue()) {
-//            searchService.index(house.getId());
-//        }
+        // es建立索引
+        if (house.getStatus() == HouseStatus.PASSES.getValue()) {
+            searchService.index(house.getId());
+        }
 
         return ServiceResult.success();
     }
@@ -266,12 +270,12 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
         boolean updateResult = this.lambdaUpdate().eq(House::getId, id).set(House::getStatus, status).update();
 
-        // TODO 上架更新索引 其他情况都要删除索引
-//        if (status == HouseStatus.PASSES.getValue()) {
-//            searchService.index(id);
-//        } else {
-//            searchService.remove(id);
-//        }
+        // 上架更新索引 其他情况都要删除索引
+        if (status == HouseStatus.PASSES.getValue()) {
+            searchService.index(id);
+        } else {
+            searchService.remove(id);
+        }
         return ServiceResult.success();
     }
 
