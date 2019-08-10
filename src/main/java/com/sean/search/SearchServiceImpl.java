@@ -2,6 +2,7 @@ package com.sean.search;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.primitives.Longs;
 import com.sean.base.ServiceMultiResult;
 import com.sean.base.ServiceResult;
 import com.sean.entity.House;
@@ -16,18 +17,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.rest.RestStatus;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.sort.SortOrder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -115,7 +120,7 @@ public class SearchServiceImpl implements ISearchService {
             }
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(QueryBuilders.termQuery(HouseIndexKey.HOUSE_ID, houseId));
-            SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
+            SearchRequest searchRequest = new SearchRequest(INDEX_NAME).source(searchSourceBuilder);
             log.debug("searchSourceBuilder: {}", searchSourceBuilder);
             SearchResponse searchResponse = esClient.search(searchRequest, RequestOptions.DEFAULT);
             log.debug("searchResponse: {}", searchResponse);
@@ -271,7 +276,40 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public ServiceMultiResult<Long> query(RentSearch rentSearch) {
-        return null;
+        try {
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            boolQuery.filter(QueryBuilders.termQuery(HouseIndexKey.CITY_EN_NAME, rentSearch.getCityEnName()));
+            if (rentSearch.getRegionEnName() != null && !"*".equals(rentSearch.getRegionEnName())) {
+                boolQuery.filter(QueryBuilders.termQuery(HouseIndexKey.REGION_EN_NAME, rentSearch.getRegionEnName()));
+            }
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQuery);
+            searchSourceBuilder.sort(
+                    HouseSort.getSortKey(rentSearch.getOrderBy()),
+                    SortOrder.fromString(rentSearch.getOrderDirection())
+            ).from(rentSearch.getStart()).size(rentSearch.getSize()).fetchSource(HouseIndexKey.HOUSE_ID, null);
+            SearchRequest searchRequest = new SearchRequest(INDEX_NAME).source(searchSourceBuilder);
+
+
+            log.debug("searchSourceBuilder: {}", searchSourceBuilder);
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            List<Long> houseIds = new ArrayList<>();
+
+            if (response.status() != RestStatus.OK) {
+                log.warn("Search status is no ok for " + searchSourceBuilder);
+                return new ServiceMultiResult<>(0, houseIds);
+            }
+
+            for (SearchHit hit : response.getHits()) {
+                houseIds.add(Longs.tryParse(String.valueOf(hit.getSourceAsMap().get(HouseIndexKey.HOUSE_ID))));
+            }
+
+            return new ServiceMultiResult<Long>(response.getHits().getHits().length, houseIds);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     @Override

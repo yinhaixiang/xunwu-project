@@ -1,8 +1,10 @@
 package com.sean.service;
 
+import com.sean.base.ServiceMultiResult;
 import com.sean.esdemo.BookService;
 import com.sean.esdemo.BookVO;
 import com.sean.esdemo.BoolQueryVO;
+import com.sean.form.RentSearch;
 import com.sean.search.ISearchService;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexResponse;
@@ -37,6 +39,18 @@ public class SearchServiceTest {
         searchService.remove(17L);
     }
 
+
+    @Test
+    public void query() {
+        RentSearch rentSearch = new RentSearch();
+        rentSearch.setCityEnName("bj");
+        rentSearch.setStart(0);
+        rentSearch.setSize(10);
+        rentSearch.setOrderBy("houseId");
+        rentSearch.setOrderDirection("asc");
+        ServiceMultiResult<Long> result = searchService.query(rentSearch);
+        System.out.println(result);
+    }
 
 
 
