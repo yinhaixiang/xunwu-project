@@ -281,36 +281,16 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
 
     @Override
     public ServiceMultiResult<HouseDTO> query(RentSearch rentSearch) {
-        List<HouseDTO> houseDTOS = new ArrayList<>();
-        Page<House> page = new Page<House>(rentSearch.getStart() / rentSearch.getSize() + 1,
-                rentSearch.getSize());
+        if (rentSearch.getKeywords() != null && !rentSearch.getKeywords().isEmpty()) {
+            ServiceMultiResult<Long> serviceResult = searchService.query(rentSearch);
+            if (serviceResult.getTotal() == 0) {
+                return new ServiceMultiResult<>(0, new ArrayList<>());
+            }
 
-        QueryWrapper<House> queryWrapper = Wrappers.<House>query()
-                .eq("status", HouseStatus.PASSES.getValue())
-                .eq("city_en_name", rentSearch.getCityEnName())
-                .orderBy(true, "asc".equals(rentSearch.getOrderDirection()), rentSearch.getOrderBy());
-
-        if ("distance_to_subway".equals(rentSearch.getOrderBy())) {
-            queryWrapper.gt("distance_to_subway", -1);
+            return new ServiceMultiResult<>(serviceResult.getTotal(), wrapperHouseResult(serviceResult.getResult()));
         }
 
-        IPage<House> housesPage = this.page(page, queryWrapper);
-
-        List<House> houses = housesPage.getRecords();
-
-        List<Long> houseIds = new ArrayList<>();
-        HashMap<Long, HouseDTO> idToHouseMap = Maps.newHashMap();
-        houses.forEach(house -> {
-            HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
-            houseDTO.setCover(this.cdnPrefix + house.getCover());
-            houseDTOS.add(houseDTO);
-            houseIds.add(house.getId());
-            idToHouseMap.put(house.getId(), houseDTO);
-        });
-
-        wrapperHouseList(houseIds, idToHouseMap);
-        return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
-
+        return simpleQuery(rentSearch);
     }
 
     @Override
@@ -456,5 +436,38 @@ public class HouseServiceImpl extends ServiceImpl<HouseMapper, House> implements
             HouseDTO house = idToHouseMap.get(houseTag.getHouseId());
             house.getTags().add(houseTag.getName());
         });
+    }
+
+
+    private ServiceMultiResult<HouseDTO> simpleQuery(RentSearch rentSearch) {
+        List<HouseDTO> houseDTOS = new ArrayList<>();
+        Page<House> page = new Page<House>(rentSearch.getStart() / rentSearch.getSize() + 1,
+                rentSearch.getSize());
+
+        QueryWrapper<House> queryWrapper = Wrappers.<House>query()
+                .eq("status", HouseStatus.PASSES.getValue())
+                .eq("city_en_name", rentSearch.getCityEnName())
+                .orderBy(true, "asc".equals(rentSearch.getOrderDirection()), rentSearch.getOrderBy());
+
+        if ("distance_to_subway".equals(rentSearch.getOrderBy())) {
+            queryWrapper.gt("distance_to_subway", -1);
+        }
+
+        IPage<House> housesPage = this.page(page, queryWrapper);
+
+        List<House> houses = housesPage.getRecords();
+
+        List<Long> houseIds = new ArrayList<>();
+        HashMap<Long, HouseDTO> idToHouseMap = Maps.newHashMap();
+        houses.forEach(house -> {
+            HouseDTO houseDTO = modelMapper.map(house, HouseDTO.class);
+            houseDTO.setCover(this.cdnPrefix + house.getCover());
+            houseDTOS.add(houseDTO);
+            houseIds.add(house.getId());
+            idToHouseMap.put(house.getId(), houseDTO);
+        });
+
+        wrapperHouseList(houseIds, idToHouseMap);
+        return new ServiceMultiResult<>(housesPage.getTotal(), houseDTOS);
     }
 }
