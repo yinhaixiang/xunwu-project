@@ -19,7 +19,6 @@ public class KafkaSender {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    //发送消息方法
     public void send() {
         try {
             Message message = new Message();

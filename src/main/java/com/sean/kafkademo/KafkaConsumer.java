@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
 
-    @KafkaListener(topics = {"sean"})
+//    @KafkaListener(topics = {"sean"})
     public void receive(String message) {
         log.info("++++++++++++++++KafkaMessageConsumer 接收到消息：" + message);
     }
