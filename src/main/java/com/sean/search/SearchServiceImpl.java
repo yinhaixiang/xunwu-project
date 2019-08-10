@@ -319,6 +319,13 @@ public class SearchServiceImpl implements ISearchService {
                         QueryBuilders.termQuery(HouseIndexKey.RENT_WAY, rentSearch.getRentWay())
                 );
             }
+
+            if (rentSearch.getRoom() > 0) {
+                boolQuery.filter(
+                        QueryBuilders.matchQuery(HouseIndexKey.ROOM, rentSearch.getRoom())
+                );
+            }
+
             boolQuery.must(
                     QueryBuilders.multiMatchQuery(rentSearch.getKeywords(),
                             HouseIndexKey.TITLE,

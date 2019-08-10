@@ -69,6 +69,9 @@ Content-Type: application/json
       },
       "rentWay": {
         "type": "integer"
+      },
+      "room": {
+        "type": "integer"
       }
     }
   }
