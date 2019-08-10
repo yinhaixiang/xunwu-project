@@ -322,7 +322,7 @@ public class SearchServiceImpl implements ISearchService {
 
             if (rentSearch.getRoom() > 0) {
                 boolQuery.filter(
-                        QueryBuilders.matchQuery(HouseIndexKey.ROOM, rentSearch.getRoom())
+                        QueryBuilders.termQuery(HouseIndexKey.ROOM, rentSearch.getRoom())
                 );
             }
 
