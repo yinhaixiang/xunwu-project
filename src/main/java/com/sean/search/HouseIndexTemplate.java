@@ -61,6 +61,6 @@ public class HouseIndexTemplate {
 
     private BaiduMapLocation location;
 
-    private Integer room;
+    private int room;
 
 }
