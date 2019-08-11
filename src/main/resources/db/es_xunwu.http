@@ -89,5 +89,3 @@ Content-Type: application/json
 
 ### 删除xunwu索引
 DELETE http://localhost:9200/xunwu
-
-###
