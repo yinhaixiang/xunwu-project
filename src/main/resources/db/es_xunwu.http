@@ -14,7 +14,9 @@ Content-Type: application/json
         "type": "long"
       },
       "title": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "ik_smart",
+        "search_analyzer": "ik_smart"
       },
       "price": {
         "type": "integer"
@@ -56,16 +58,24 @@ Content-Type: application/json
         "type": "keyword"
       },
       "description": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "ik_smart",
+        "search_analyzer": "ik_smart"
       },
       "layoutDesc": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "ik_smart",
+        "search_analyzer": "ik_smart"
       },
       "traffic": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "ik_smart",
+        "search_analyzer": "ik_smart"
       },
       "roundService": {
-        "type": "text"
+        "type": "text",
+        "analyzer": "ik_smart",
+        "search_analyzer": "ik_smart"
       },
       "rentWay": {
         "type": "integer"
