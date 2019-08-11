@@ -347,6 +347,11 @@ public class SearchServiceImpl implements ISearchService {
             }
 
             boolQuery.must(
+                    QueryBuilders.matchQuery(HouseIndexKey.TITLE, rentSearch.getKeywords())
+                            .boost(2.0f)
+            );
+
+            boolQuery.must(
                     QueryBuilders.multiMatchQuery(rentSearch.getKeywords(),
                             HouseIndexKey.TITLE,
                             HouseIndexKey.TRAFFIC,
