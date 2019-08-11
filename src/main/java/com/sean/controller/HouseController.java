@@ -10,6 +10,7 @@ import com.sean.entity.SubwayStation;
 import com.sean.entity.SupportAddress;
 import com.sean.entity.User;
 import com.sean.form.RentSearch;
+import com.sean.search.ISearchService;
 import com.sean.service.IAddressService;
 import com.sean.service.IHouseService;
 import com.sean.service.IUserService;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +36,9 @@ public class HouseController {
 
     @Autowired
     private IUserService userService;
+
+    @Autowired
+    private ISearchService searchService;
 
     /**
      * 获取支持城市列表
@@ -182,6 +187,19 @@ public class HouseController {
         model.addAttribute("houseCountInDistrict", 0);
 
         return "house-detail";
+    }
+
+    /**
+     * 自动补全接口
+     */
+    @GetMapping("rent/house/autocomplete")
+    @ResponseBody
+    public ApiResponse autocomplete(@RequestParam(value = "prefix") String prefix) {
+        if (prefix.isEmpty()) {
+            return ApiResponse.ofStatus(ApiResponse.Status.BAD_REQUEST);
+        }
+        ServiceResult<List<String>> result = this.searchService.suggest(prefix);
+        return ApiResponse.ofSuccess(result.getResult());
     }
 
 }

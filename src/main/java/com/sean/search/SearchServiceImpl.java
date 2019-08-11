@@ -2,6 +2,7 @@ package com.sean.search;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Lists;
 import com.google.common.primitives.Longs;
 import com.sean.base.RentValueBlock;
 import com.sean.base.ServiceMultiResult;
@@ -15,6 +16,10 @@ import com.sean.service.IHouseDetailService;
 import com.sean.service.IHouseService;
 import com.sean.service.IHouseTagService;
 import lombok.extern.slf4j.Slf4j;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeAction;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
+import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,6 +28,7 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -34,6 +40,11 @@ import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestionBuilder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -43,7 +54,9 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -64,6 +77,9 @@ public class SearchServiceImpl implements ISearchService {
 
     @Resource
     private RestHighLevelClient esClient;
+
+//    @Autowired
+//    private TransportClient esOldClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -194,6 +210,10 @@ public class SearchServiceImpl implements ISearchService {
 
 
     private boolean create(HouseIndexTemplate indexTemplate) {
+        if (!updateSuggest(indexTemplate)) {
+            return false;
+        }
+
         try {
             IndexRequest indexRequest = new IndexRequest(INDEX_NAME).source(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
             log.debug("indexRequest.source: {}", indexRequest.sourceAsMap());
@@ -212,6 +232,10 @@ public class SearchServiceImpl implements ISearchService {
     }
 
     private boolean update(String esId, HouseIndexTemplate indexTemplate) {
+        if (!updateSuggest(indexTemplate)) {
+            return false;
+        }
+
         try {
             UpdateRequest request = new UpdateRequest(INDEX_NAME, esId);
             request.doc(objectMapper.writeValueAsBytes(indexTemplate), XContentType.JSON);
@@ -367,7 +391,56 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public ServiceResult<List<String>> suggest(String prefix) {
-        return null;
+        try {
+            CompletionSuggestionBuilder suggestion = SuggestBuilders.completionSuggestion("suggest").prefix(prefix).size(5);
+
+            SuggestBuilder suggestBuilder = new SuggestBuilder();
+            suggestBuilder.addSuggestion("autocomplete", suggestion);
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            searchSourceBuilder.suggest(suggestBuilder);
+            SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
+
+            log.debug("searchSourceBuilder: {}", searchSourceBuilder);
+
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
+            Suggest suggest = response.getSuggest();
+            if (suggest == null) {
+                return ServiceResult.of(new ArrayList<>());
+            }
+            Suggest.Suggestion result = suggest.getSuggestion("autocomplete");
+
+            int maxSuggest = 0;
+            Set<String> suggestSet = new HashSet<>();
+
+            for (Object term : result.getEntries()) {
+                if (term instanceof CompletionSuggestion.Entry) {
+                    CompletionSuggestion.Entry item = (CompletionSuggestion.Entry) term;
+
+                    if (item.getOptions().isEmpty()) {
+                        continue;
+                    }
+
+                    for (CompletionSuggestion.Entry.Option option : item.getOptions()) {
+                        String tip = option.getText().string();
+                        if (suggestSet.contains(tip)) {
+                            continue;
+                        }
+                        suggestSet.add(tip);
+                        maxSuggest++;
+                    }
+                }
+
+                if (maxSuggest > 5) {
+                    break;
+                }
+            }
+            List<String> suggests = Lists.newArrayList(suggestSet.toArray(new String[]{}));
+            return ServiceResult.of(suggests);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ServiceResult.notFound();
+        }
     }
 
     @Override
@@ -388,5 +461,46 @@ public class SearchServiceImpl implements ISearchService {
     @Override
     public ServiceMultiResult<Long> mapQuery(MapSearch mapSearch) {
         return null;
+    }
+
+    private boolean updateSuggest(HouseIndexTemplate indexTemplate) {
+        try {
+            AnalyzeRequest analyzeRequest = new AnalyzeRequest(INDEX_NAME);
+            analyzeRequest.text(indexTemplate.getTitle(), indexTemplate.getLayoutDesc(),
+                    indexTemplate.getRoundService(), indexTemplate.getDescription(),
+                    indexTemplate.getSubwayLineName(), indexTemplate.getSubwayStationName());
+            analyzeRequest.analyzer("ik_smart");
+
+            AnalyzeResponse analyzeResponse = esClient.indices().analyze(analyzeRequest, RequestOptions.DEFAULT);
+
+            List<AnalyzeResponse.AnalyzeToken> tokens = analyzeResponse.getTokens();
+            if (tokens == null) {
+                log.warn("Can not analyze token for house: " + indexTemplate.getHouseId());
+                return false;
+            }
+
+            List<HouseSuggest> suggests = new ArrayList<>();
+            for (AnalyzeResponse.AnalyzeToken token : tokens) {
+                // 排序数字类型 & 小于2个字符的分词结果
+                if ("<NUM>".equals(token.getType()) || token.getTerm().length() < 2) {
+                    continue;
+                }
+
+                HouseSuggest suggest = new HouseSuggest();
+                suggest.setInput(token.getTerm());
+                suggests.add(suggest);
+            }
+
+            // 定制化小区自动补全
+            HouseSuggest suggest = new HouseSuggest();
+            suggest.setInput(indexTemplate.getDistrict());
+            suggests.add(suggest);
+
+            indexTemplate.setSuggest(suggests);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
