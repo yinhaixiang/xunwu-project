@@ -16,9 +16,7 @@ import com.sean.service.IHouseDetailService;
 import com.sean.service.IHouseService;
 import com.sean.service.IHouseTagService;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeAction;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequest;
-import org.elasticsearch.action.admin.indices.analyze.AnalyzeRequestBuilder;
 import org.elasticsearch.action.admin.indices.analyze.AnalyzeResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
@@ -28,7 +26,6 @@ import org.elasticsearch.action.update.UpdateRequest;
 import org.elasticsearch.action.update.UpdateResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -38,6 +35,8 @@ import org.elasticsearch.index.reindex.BulkByScrollResponse;
 import org.elasticsearch.index.reindex.DeleteByQueryRequest;
 import org.elasticsearch.rest.RestStatus;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.aggregations.AggregationBuilders;
+import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.Suggest;
@@ -77,9 +76,6 @@ public class SearchServiceImpl implements ISearchService {
 
     @Resource
     private RestHighLevelClient esClient;
-
-//    @Autowired
-//    private TransportClient esOldClient;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -399,7 +395,7 @@ public class SearchServiceImpl implements ISearchService {
 
             SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
             searchSourceBuilder.suggest(suggestBuilder);
-            SearchRequest searchRequest = new SearchRequest().source(searchSourceBuilder);
+            SearchRequest searchRequest = new SearchRequest(INDEX_NAME).source(searchSourceBuilder);
 
             log.debug("searchSourceBuilder: {}", searchSourceBuilder);
 
@@ -445,7 +441,36 @@ public class SearchServiceImpl implements ISearchService {
 
     @Override
     public ServiceResult<Long> aggregateDistrictHouse(String cityEnName, String regionEnName, String district) {
-        return null;
+        try {
+            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery()
+                    .filter(QueryBuilders.termQuery(HouseIndexKey.CITY_EN_NAME, cityEnName))
+                    .filter(QueryBuilders.termQuery(HouseIndexKey.REGION_EN_NAME, regionEnName))
+                    .filter(QueryBuilders.termQuery(HouseIndexKey.DISTRICT, district));
+
+            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder().query(boolQuery);
+            searchSourceBuilder.aggregation(AggregationBuilders.terms(HouseIndexKey.AGG_DISTRICT)
+                    .field(HouseIndexKey.DISTRICT)).size(0);
+
+            SearchRequest searchRequest = new SearchRequest(INDEX_NAME).source(searchSourceBuilder);
+
+            log.debug("searchSourceBuilder: {}", searchSourceBuilder);
+
+            SearchResponse response = esClient.search(searchRequest, RequestOptions.DEFAULT);
+
+            if (response.status() == RestStatus.OK) {
+                Terms terms = response.getAggregations().get(HouseIndexKey.AGG_DISTRICT);
+                if (terms.getBuckets() != null && !terms.getBuckets().isEmpty()) {
+                    return ServiceResult.of(terms.getBucketByKey(district).getDocCount());
+                }
+            } else {
+                log.warn("Failed to Aggregate for " + HouseIndexKey.AGG_DISTRICT);
+
+            }
+            return ServiceResult.of(0L);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ServiceResult.notFound();
+        }
     }
 
     @Override

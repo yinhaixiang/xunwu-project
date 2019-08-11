@@ -1,6 +1,7 @@
 package com.sean.service;
 
 import com.sean.base.ServiceMultiResult;
+import com.sean.base.ServiceResult;
 import com.sean.esdemo.BookService;
 import com.sean.esdemo.BookVO;
 import com.sean.esdemo.BoolQueryVO;
@@ -52,6 +53,14 @@ public class SearchServiceTest {
         System.out.println(result);
     }
 
+    @Test
+    public void aggregateDistrictHouse() {
+        String cityEnName = "bj";
+        String regionEnName = "hdq";
+        String district = "融泽嘉园";
+        ServiceResult<Long> result = searchService.aggregateDistrictHouse(cityEnName, regionEnName, district);
+        System.out.println(result);
+    }
 
 
 }
