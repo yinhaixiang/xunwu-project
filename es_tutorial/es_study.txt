@@ -40,6 +40,353 @@ GET /_cat/indices/kibana*?pri&v&h=health,index,pri,rep,docs.count,mt
 #查看每个索引占用多少空间
 GET /_cat/indices?v&h=i,tm&s=tm:desc
 
+GET _cluster/health
+
+GET _cat/nodes
+
+GET _cat/shards
+
+#create document. 自动生成 _id
+POST users/_doc
+{
+	"user" : "Mike",
+    "post_date" : "2019-04-15T14:12:12",
+    "message" : "trying out Kibana"
+}
+
+
+#create document. 指定Id。如果id已经存在，报错
+PUT users/_doc/1?op_type=create
+{
+    "user" : "Jack",
+    "post_date" : "2019-05-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}
+
+
+#create document. 指定 ID 如果已经存在，就报错
+PUT users/_create/1
+{
+     "user" : "Jack",
+    "post_date" : "2019-05-15T14:12:12",
+    "message" : "trying out Elasticsearch"
+}
+
+#Get the document by ID
+GET users/_doc/1
+
+#Update 指定 ID  (先删除，在写入)
+PUT users/_doc/1
+{
+	"user" : "Mike"
+}
+
+#在原文档上增加字段
+POST users/_update/1/
+{
+  "doc": {
+    "post_date": "2019-05-15T14:12:12",
+    "message": "trying out Elasticsearch"
+  }
+}
+
+#执行第1次
+POST _bulk
+{"index":{"_index":"test","_id":"1"}}
+{"field1":"value1"}
+{"delete":{"_index":"test","_id":"2"}}
+{"create":{"_index":"test","_id":"2"}}
+{"field1":"value3"}
+{"update":{"_id":"1","_index":"test"}}
+{"doc":{"field2":"value2"}}
+
+
+#执行第2次
+POST _bulk
+{"index":{"_index":"test","_id":"1"}}
+{"field1":"value1"}
+{"delete":{"_index":"test","_id":"2"}}
+{"create":{"_index":"test2","_id":"3"}}
+{"field1":"value3"}
+{"update":{"_id":"1","_index":"test"}}
+{"doc":{"field2":"value2"}}
+
+### mget 操作
+GET /_mget
+{
+  "docs": [
+    {
+      "_index": "test",
+      "_id": "1"
+    },
+    {
+      "_index": "test",
+      "_id": "2"
+    }
+  ]
+}
+
+
+#URI中指定index
+GET /test/_mget
+{
+  "docs": [
+    {
+      "_id": "1"
+    },
+    {
+      "_id": "2"
+    }
+  ]
+}
+
+
+GET /_mget
+{
+  "docs": [
+    {
+      "_index": "test",
+      "_id": "1",
+      "_source": false
+    },
+    {
+      "_index": "test",
+      "_id": "2",
+      "_source": [
+        "field3",
+        "field4"
+      ]
+    },
+    {
+      "_index": "test",
+      "_id": "3",
+      "_source": {
+        "include": [
+          "user"
+        ],
+        "exclude": [
+          "user.location"
+        ]
+      }
+    }
+  ]
+}
+
+
+POST _analyze
+{
+  "analyzer": "standard",
+  "text": "Mastering Elasticsearch"
+}
+
+#Simple Analyzer – 按照非字母切分（符号被过滤），小写处理
+#Stop Analyzer – 小写处理，停用词过滤（the，a，is）
+#Whitespace Analyzer – 按照空格切分，不转小写
+#Keyword Analyzer – 不分词，直接将输入当作输出
+#Patter Analyzer – 正则表达式，默认 \W+ (非字符分隔)
+#Language – 提供了30多种常见语言的分词器
+#2 running Quick brown-foxes leap over lazy dogs in the summer evening
+
+#查看不同的analyzer的效果
+#standard
+GET _analyze
+{
+  "analyzer": "standard",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+
+#simpe
+GET _analyze
+{
+  "analyzer": "simple",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+#stop
+GET _analyze
+{
+  "analyzer": "stop",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+
+#whitespace
+GET _analyze
+{
+  "analyzer": "whitespace",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+#keyword
+GET _analyze
+{
+  "analyzer": "keyword",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+
+GET _analyze
+{
+  "analyzer": "pattern",
+  "text": "2 running Quick brown-foxes leap over lazy dogs in the summer evening."
+}
+
+
+POST _analyze
+{
+  "analyzer": "icu_analyzer",
+  "text": "他说的确实在理"
+}
+
+POST _analyze
+{
+  "analyzer": "icu_analyzer",
+  "text": "这个苹果不大好吃"
+}
+
+
+
+#基本查询
+GET /movies/_search?q=2012&df=title&sort=year:desc&from=0&size=10&timeout=1s
+
+
+
+#带profile
+GET /movies/_search?q=2012&df=title
+{
+	"profile":"true"
+}
+
+#泛查询，正对_all,所有字段
+GET /movies/_search?q=2012
+{
+	"profile":"true"
+}
+
+#指定字段
+GET /movies/_search?q=title:2012&sort=year:desc&from=0&size=10&timeout=1s
+{
+	"profile":"true"
+}
+
+
+# 查找美丽心灵, Mind为泛查询
+GET /movies/_search?q=title:Beautiful Mind
+{
+	"profile":"true"
+}
+
+# 泛查询
+GET /movies/_search?q=title:2012
+{
+	"profile":"true"
+}
+
+#使用引号，Phrase查询
+GET /movies/_search?q=title:"Beautiful Mind"
+{
+	"profile":"true"
+}
+
+#分组，Bool查询
+GET /movies/_search?q=title:(Beautiful Mind)
+{
+	"profile":"true"
+}
+
+#布尔操作符
+# 查找美丽心灵
+GET /movies/_search?q=title:(Beautiful AND Mind)
+{
+	"profile":"true"
+}
+
+# 查找美丽心灵
+GET /movies/_search?q=title:(Beautiful NOT Mind)
+{
+	"profile":"true"
+}
+
+# 查找美丽心灵
+GET /movies/_search?q=title:(Beautiful %2BMind)
+{
+	"profile":"true"
+}
+
+
+#范围查询 ,区间写法
+GET /movies/_search?q=title:beautiful AND year:[2002 TO 2018%7D
+{
+	"profile":"true"
+}
+
+#通配符查询
+GET /movies/_search?q=title:b*
+{
+	"profile":"true"
+}
+
+#模糊匹配&近似度匹配
+GET /movies/_search?q=title:beautifl~1
+{
+	"profile":"true"
+}
+
+
+GET /movies/_search?q=title:"Lord Rings"~2
+{
+	"profile":"true"
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
