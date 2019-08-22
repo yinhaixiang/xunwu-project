@@ -15,12 +15,16 @@ import java.util.Date;
 public class TT {
 
     public static void main(String args[]) throws Exception {
-        BookVO book = new BookVO();
-        book.setType("Y");
-        book.setAuthor("aa");
-        book.setWord_count(123);
-        book.setTitle("ccc");
-        book.setPublish_date("2019-09-09");
-        System.out.println((new ObjectMapper()).writeValueAsBytes(book).toString());
+//        BookVO book = new BookVO();
+//        book.setType("Y");
+//        book.setAuthor("aa");
+//        book.setWord_count(123);
+//        book.setTitle("ccc");
+//        book.setPublish_date("2019-09-09");
+//        System.out.println((new ObjectMapper()).writeValueAsBytes(book).toString());
+
+
+        String str = "abc,def";
+        System.out.println(str.contains("defe"));
     }
 }
