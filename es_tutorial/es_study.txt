@@ -339,19 +339,550 @@ GET /movies/_search?q=title:"Lord Rings"~2
 	"profile":"true"
 }
 
+#ignore_unavailable=true，可以忽略尝试访问不存在的索引“404_idx”导致的报错
+#查询movies分页
+POST /movies,404_idx/_search?ignore_unavailable=true
+{
+  "profile": true,
+	"query": {
+		"match_all": {}
+	}
+}
+
+POST /kibana_sample_data_ecommerce/_search
+{
+  "from":10,
+  "size":20,
+  "query":{
+    "match_all": {}
+  }
+}
+
+#对日期排序
+POST kibana_sample_data_ecommerce/_search
+{
+  "sort":[{"order_date":"desc"}],
+  "query":{
+    "match_all": {}
+  }
+}
+
+#source filtering
+POST kibana_sample_data_ecommerce/_search
+{
+  "_source":["order_date"],
+  "query":{
+    "match_all": {}
+  }
+}
+
+#脚本字段
+GET kibana_sample_data_ecommerce/_search
+{
+  "script_fields": {
+    "new_field": {
+      "script": {
+        "lang": "painless",
+        "source": "doc['order_date'].value+'hello'"
+      }
+    }
+  },
+  "query": {
+    "match_all": {}
+  }
+}
+
+POST movies/_search
+{
+  "query": {
+    "match": {
+      "title": "last christmas"
+    }
+  },
+  "profile": true
+}
+
+POST movies/_search
+{
+  "query": {
+    "match": {
+      "title": {
+        "query": "last christmas",
+        "operator": "and"
+      }
+    }
+  },
+  "profile": "true"
+}
+
+POST movies/_search
+{
+  "query": {
+    "match_phrase": {
+      "title":{
+        "query": "one love"
+      }
+    }
+  },
+  "profile": "true"
+}
+
+POST movies/_search
+{
+  "query": {
+    "match_phrase": {
+      "title": {
+        "query": "one love",
+        "slop": 1
+      }
+    }
+  },
+  "profile": "true"
+}
+
+
+PUT /users/_doc/1
+{
+  "name":"Ruan Yiming",
+  "about":"java, golang, node, swift, elasticsearch"
+}
+
+PUT /users/_doc/2
+{
+  "name":"Li Yiming",
+  "about":"Hadoop"
+}
+
+POST users/_search
+{
+  "query": {
+    "query_string": {
+      "default_field": "name",
+      "query": "Ruan AND Yiming"
+    }
+  },
+  "profile": "true"
+}
+
+POST users/_search
+{
+  "query": {
+    "query_string": {
+      "fields":["name","about"],
+      "query": "(Ruan AND Yiming) OR (Java AND Elasticsearch)"
+    }
+  },
+  "profile": "true"
+}
+
+#Simple Query 默认的operator是 Or
+POST users/_search
+{
+  "query": {
+    "simple_query_string": {
+      "query": "Ruan AND Yiming",
+      "fields": ["name"]
+    }
+  },
+  "profile": "true"
+}
+
+POST users/_search
+{
+  "query": {
+    "simple_query_string": {
+      "query": "Ruan Yiming",
+      "fields": ["name"],
+      "default_operator": "AND"
+    }
+  },
+  "profile": "true"
+}
+
+GET /movies/_search
+{
+	"profile": true,
+	"query":{
+		"query_string":{
+			"default_field": "title",
+			"query": "Beafiful AND Mind"
+		}
+	}
+}
 
 
 
+# 多fields
+GET /movies/_search
+{
+	"profile": true,
+	"query":{
+		"query_string":{
+			"fields":[
+				"title",
+				"year"
+			],
+			"query": "2012"
+		}
+	}
+}
+
+GET /movies/_search
+{
+	"profile":true,
+	"query":{
+		"simple_query_string":{
+			"query":"Beautiful +mind",
+			"fields":["title"]
+		}
+	}
+}
+
+GET /movies/_search
+{
+	"profile":true,
+	"query":{
+		"simple_query_string":{
+			"query":"+Beautiful mind",
+			"fields":["title"]
+		}
+	}
+}
+
+GET /movies/_search
+{
+	"profile":true,
+	"query":{
+		"simple_query_string":{
+			"query":"Beautiful mind",
+			"fields":["title"]
+		}
+	}
+}
+
+GET /movies/_search
+{
+	"profile":true,
+	"query":{
+		"simple_query_string":{
+			"query":"+Beautiful +mind",
+			"fields":["title"]
+		}
+	}
+}
 
 
+#写入文档，查看 Mapping
+PUT mapping_test/_doc/1
+{
+  "firstName":"Chan",
+  "lastName": "Jackie",
+  "loginDate":"2018-07-24T10:29:48.103Z"
+}
+
+#查看 Mapping文件
+GET mapping_test/_mapping
+
+#Delete index
+DELETE mapping_test
+
+#dynamic mapping，推断字段的类型
+PUT mapping_test/_doc/1
+{
+    "uid" : "123",
+    "isVip" : false,
+    "isAdmin": "true",
+    "age":19,
+    "heigh":180
+}
+
+#查看 Dynamic
+GET mapping_test/_mapping
+
+#默认Mapping支持dynamic，写入的文档中加入新的字段
+PUT dynamic_mapping_test/_doc/1
+{
+  "newField":"someValue"
+}
 
 
+#该字段可以被搜索，数据也在_source中出现
+POST dynamic_mapping_test/_search
+{
+  "query":{
+    "match":{
+      "newField":"someValue"
+    }
+  }
+}
+
+#修改为dynamic false
+PUT dynamic_mapping_test/_mapping
+{
+  "dynamic": false
+}
+
+#新增 anotherField
+PUT dynamic_mapping_test/_doc/10
+{
+  "anotherField":"someValue"
+}
 
 
+#该字段不可以被搜索，应为dynamic已经被设置为false
+POST dynamic_mapping_test/_search
+{
+  "query":{
+    "match":{
+      "anotherField":"someValue"
+    }
+  }
+}
+
+GET dynamic_mapping_test/_doc/10
+
+#修改为strict
+PUT dynamic_mapping_test/_mapping
+{
+  "dynamic": "strict"
+}
+
+#写入数据出错，HTTP Code 400
+PUT dynamic_mapping_test/_doc/12
+{
+  "lastField":"value"
+}
+
+DELETE dynamic_mapping_test
 
 
+#设置 index 为 false
+DELETE users
+
+PUT users
+{
+    "mappings" : {
+      "properties" : {
+        "firstName" : {
+          "type" : "text"
+        },
+        "lastName" : {
+          "type" : "text"
+        },
+        "mobile" : {
+          "type" : "text",
+          "index": false
+        }
+      }
+    }
+}
+
+PUT users/_doc/1
+{
+  "firstName":"Ruan",
+  "lastName": "Yiming",
+  "mobile": "12345678"
+}
+
+POST /users/_search
+{
+  "query": {
+    "match": {
+      "mobile":"12345678"
+    }
+  }
+}
+
+DELETE users
+
+PUT users
+{
+    "mappings" : {
+      "properties" : {
+        "firstName" : {
+          "type" : "text"
+        },
+        "lastName" : {
+          "type" : "text"
+        },
+        "mobile" : {
+          "type" : "keyword",
+          "null_value": "NULL"
+        }
+
+      }
+    }
+}
+
+PUT users/_doc/1
+{
+  "firstName":"Ruan",
+  "lastName": "Yiming",
+  "mobile": null
+}
+
+PUT users/_doc/2
+{
+  "firstName": "Ruan2",
+  "lastName": "Yiming2"
+}
+
+GET users/_search
+{
+  "query": {
+    "match": {
+      "mobile": "NULL"
+    }
+  }
+}
+
+#设置 Copy to
+DELETE users
+PUT users
+{
+  "mappings": {
+    "properties": {
+      "firstName":{
+        "type": "text",
+        "copy_to": "fullName"
+      },
+      "lastName":{
+        "type": "text",
+        "copy_to": "fullName"
+      }
+    }
+  }
+}
+
+PUT users/_doc/1
+{
+  "firstName":"Ruan",
+  "lastName": "Yiming"
+}
+
+GET users/_search?q=fullName:(Ruan Yiming)
+
+POST users/_search
+{
+  "query": {
+    "match": {
+       "fullName":{
+        "query": "Ruan Yiming",
+        "operator": "and"
+      }
+    }
+  }
+}
+
+#数组类型
+PUT users/_doc/1
+{
+  "name":"onebird",
+  "interests":"reading"
+}
+
+PUT users/_doc/1
+{
+  "name": "twobirds",
+  "interests": [
+    "reading",
+    "music"
+  ]
+}
+
+POST users/_search
+{
+  "query": {
+		"match_all": {}
+	}
+}
+
+GET users/_mapping
+
+PUT logs/_doc/1
+{"level":"DEBUG"}
+
+GET /logs/_mapping
+
+POST _analyze
+{
+  "tokenizer": "keyword",
+  "char_filter": [
+    "html_strip"
+  ],
+  "text": "<b>hello world</b>"
+}
+
+POST _analyze
+{
+  "tokenizer":"path_hierarchy",
+  "text":"/user/ymruan/a/b/c/d/e"
+}
+
+#使用char filter进行替换
+POST _analyze
+{
+  "tokenizer": "standard",
+  "char_filter": [
+      {
+        "type" : "mapping",
+        "mappings" : [ "- => _"]
+      }
+    ],
+  "text": "123-456, I-test! test-990 650-555-1234"
+}
+
+//char filter 替换表情符号
+POST _analyze
+{
+  "tokenizer": "standard",
+  "char_filter": [
+      {
+        "type" : "mapping",
+        "mappings" : [ ":) => happy", ":( => sad"]
+      }
+    ],
+    "text": ["I am felling :)", "Feeling :( today"]
+}
+
+// white space and snowball
+GET _analyze
+{
+  "tokenizer": "whitespace",
+  "filter": ["stop","snowball"],
+  "text": ["The gilrs in China are playing this game!"]
+}
+
+// whitespace与stop
+GET _analyze
+{
+  "tokenizer": "whitespace",
+  "filter": ["stop","snowball"],
+  "text": ["The rain in Spain falls mainly on the plain."]
+}
+
+//remove 加入lowercase后，The被当成 stopword删除
+GET _analyze
+{
+  "tokenizer": "whitespace",
+  "filter": ["lowercase","stop","snowball"],
+  "text": ["The gilrs in China are playing this game!"]
+}
 
 
+//正则表达式
+GET _analyze
+{
+  "tokenizer": "standard",
+  "char_filter": [
+      {
+        "type" : "pattern_replace",
+        "pattern" : "http://(.*)",
+        "replacement" : "$1"
+      }
+    ],
+    "text" : "http://www.elastic.co"
+}
 
 
 
