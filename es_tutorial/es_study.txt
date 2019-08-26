@@ -2102,15 +2102,309 @@ POST tmdb/_search/template
   }
 }
 
+DELETE blogs
+PUT /blogs/_doc/1
+{
+  "title":   "About popularity",
+  "content": "In this post we will talk about...",
+  "votes":   0
+}
+
+PUT /blogs/_doc/2
+{
+  "title":   "About popularity",
+  "content": "In this post we will talk about...",
+  "votes":   100
+}
+
+PUT /blogs/_doc/3
+{
+  "title":   "About popularity",
+  "content": "In this post we will talk about...",
+  "votes":   1000000
+}
+
+
+POST /blogs/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query": "popularity",
+          "fields": [
+            "title",
+            "content"
+          ]
+        }
+      },
+      "field_value_factor": {
+        "field": "votes"
+      }
+    }
+  }
+}
+
+
+POST /blogs/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query": "popularity",
+          "fields": [
+            "title",
+            "content"
+          ]
+        }
+      },
+      "field_value_factor": {
+        "field": "votes",
+        "modifier": "log1p"
+      }
+    }
+  }
+}
+
+
+POST /blogs/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query": "popularity",
+          "fields": [
+            "title",
+            "content"
+          ]
+        }
+      },
+      "field_value_factor": {
+        "field": "votes",
+        "modifier": "log1p",
+        "factor": 0.1
+      }
+    }
+  }
+}
+
+
+POST /blogs/_search
+{
+  "query": {
+    "function_score": {
+      "query": {
+        "multi_match": {
+          "query": "popularity",
+          "fields": [
+            "title",
+            "content"
+          ]
+        }
+      },
+      "field_value_factor": {
+        "field": "votes",
+        "modifier": "log1p",
+        "factor": 0.1
+      },
+      "boost_mode": "sum",
+      "max_boost": 3
+    }
+  }
+}
+
+POST /blogs/_search
+{
+  "query": {
+    "function_score": {
+      "random_score": {
+        "seed": 911119
+      }
+    }
+  }
+}
+
+
+DELETE articles
+
+POST articles/_bulk
+{ "index" : { } }
+{ "body": "lucene is very cool"}
+{ "index" : { } }
+{ "body": "Elasticsearch builds on top of lucene"}
+{ "index" : { } }
+{ "body": "Elasticsearch rocks"}
+{ "index" : { } }
+{ "body": "elastic is the company behind ELK stack"}
+{ "index" : { } }
+{ "body": "Elk stack rocks"}
+{ "index" : {} }
+{  "body": "elasticsearch is rock solid"}
+
+POST _analyze
+{
+  "analyzer": "standard",
+  "text": ["Elk stack  rocks rock"]
+}
+
+
+POST /articles/_search
+{
+  "size": 1,
+  "query": {
+    "match": {
+      "body": "lucen rock"
+    }
+  },
+  "suggest": {
+    "term-suggestion": {
+      "text": "lucen rock",
+      "term": {
+        "suggest_mode": "missing",
+        "field": "body"
+      }
+    }
+  }
+}
+
+
+POST /articles/_search
+{
+  "suggest": {
+    "term-suggestion": {
+      "text": "lucen rock",
+      "term": {
+        "suggest_mode": "popular",
+        "field": "body"
+      }
+    }
+  }
+}
+
+POST /articles/_search
+{
+  "suggest": {
+    "term-suggestion": {
+      "text": "lucen rock",
+      "term": {
+        "suggest_mode": "always",
+        "field": "body"
+      }
+    }
+  }
+}
+
+POST /articles/_search
+{
+  "suggest": {
+    "term-suggestion": {
+      "text": "lucen hocks",
+      "term": {
+        "suggest_mode": "always",
+        "field": "body",
+        "prefix_length": 0,
+        "sort": "frequency"
+      }
+    }
+  }
+}
+
+
+DELETE articles
+PUT articles
+{
+  "mappings": {
+    "properties": {
+      "title_completion":{
+        "type": "completion"
+      }
+    }
+  }
+}
+
+POST articles/_bulk
+{ "index" : { } }
+{ "title_completion": "lucene is very cool"}
+{ "index" : { } }
+{ "title_completion": "Elasticsearch builds on top of lucene"}
+{ "index" : { } }
+{ "title_completion": "Elasticsearch rocks"}
+{ "index" : { } }
+{ "title_completion": "elastic is the company behind ELK stack"}
+{ "index" : { } }
+{ "title_completion": "Elk stack rocks"}
+{ "index" : {} }
+
+
+POST articles/_search?pretty
+{
+  "size": 0,
+  "suggest": {
+    "article-suggester": {
+      "prefix": "elk ",
+      "completion": {
+        "field": "title_completion"
+      }
+    }
+  }
+}
 
 
 
 
+DELETE comments
+PUT comments
+PUT comments/_mapping
+{
+  "properties": {
+    "comment_autocomplete":{
+      "type": "completion",
+      "contexts":[{
+        "type":"category",
+        "name":"comment_category"
+      }]
+    }
+  }
+}
 
+POST comments/_doc
+{
+  "comment":"I love the star war movies",
+  "comment_autocomplete":{
+    "input":["star wars"],
+    "contexts":{
+      "comment_category":"movies"
+    }
+  }
+}
 
+POST comments/_doc
+{
+  "comment":"Where can I find a Starbucks",
+  "comment_autocomplete":{
+    "input":["starbucks"],
+    "contexts":{
+      "comment_category":"coffee"
+    }
+  }
+}
 
-
-
+POST comments/_search
+{
+  "suggest": {
+    "my_suggestion": {
+      "prefix": "sta",
+      "completion":{
+        "field":"comment_autocomplete",
+        "contexts":{
+          "comment_category":"coffee"
+        }
+      }
+    }
+  }
+}
 
 
 
