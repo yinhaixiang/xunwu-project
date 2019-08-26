@@ -1870,13 +1870,202 @@ POST news/_search
 }
 
 
+PUT /blogs/_doc/1
+{
+  "title": "Quick brown rabbits",
+  "body": "Brown rabbits are commonly seen."
+}
+
+PUT /blogs/_doc/2
+{
+  "title": "Keeping pets healthy",
+  "body": "My quick brown fox eats rabbits on a regular basis."
+}
+
+POST /blogs/_search
+{
+  "query": {
+    "bool": {
+      "should": [
+        {
+          "match": {
+            "title": "Brown fox"
+          }
+        },
+        {
+          "match": {
+            "body": "Brown fox"
+          }
+        }
+      ]
+    }
+  }
+}
+
+POST blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": "Quick fox"
+          }
+        },
+        {
+          "match": {
+            "body": "Quick fox"
+          }
+        }
+      ]
+    }
+  }
+}
 
 
+POST blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": "Quick pets"
+          }
+        },
+        {
+          "match": {
+            "body": "Quick pets"
+          }
+        }
+      ]
+    }
+  }
+}
 
 
+POST blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": "Quick pets"
+          }
+        },
+        {
+          "match": {
+            "body": "Quick pets"
+          }
+        }
+      ],
+      "tie_breaker": 0.2
+    }
+  }
+}
 
+POST blogs/_search
+{
+  "query": {
+    "dis_max": {
+      "queries": [
+        {
+          "match": {
+            "title": "Quick pets"
+          }
+        },
+        {
+          "match": {
+            "body": "Quick pets"
+          }
+        }
+      ],
+      "tie_breaker": 0.2
+    }
+  }
+}
 
+POST blogs/_search
+{
+  "query": {
+    "multi_match": {
+      "type": "best_fields",
+      "query": "Quick pets",
+      "fields": [
+        "title",
+        "body"
+      ],
+      "tie_breaker": 0.2,
+      "minimum_should_match": "20%"
+    }
+  }
+}
 
+DELETE /titles
+PUT /titles
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "title": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "std": {
+            "type": "text",
+            "analyzer": "standard"
+          }
+        }
+      }
+    }
+  }
+}
+
+POST titles/_bulk
+{ "index": { "_id": 1 }}
+{ "title": "My dog barks" }
+{ "index": { "_id": 2 }}
+{ "title": "I see a lot of barking dogs on the road " }
+
+GET titles/_search
+{
+  "query": {
+    "match": {
+      "title": "barking dogs"
+    }
+  }
+}
+
+GET /titles/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "barking dogs",
+      "type": "most_fields",
+      "fields": [
+        "title",
+        "title.std"
+      ]
+    }
+  }
+}
+
+GET /titles/_search
+{
+  "query": {
+    "multi_match": {
+      "query": "barking dogs",
+      "type": "most_fields",
+      "fields": [
+        "title^10",
+        "title.std"
+      ]
+    }
+  }
+}
 
 
 
