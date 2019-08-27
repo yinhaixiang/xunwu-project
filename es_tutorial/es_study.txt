@@ -2586,11 +2586,124 @@ POST temp_users/_search
 }
 
 
+POST tmdb/_search
+{
+  "from": 10000,
+  "size": 1,
+  "query": {
+    "match_all": {}
+  }
+}
+
+#Scroll API
+DELETE users
+
+POST users/_doc
+{"name":"user1","age":10}
+
+POST users/_doc
+{"name":"user2","age":11}
 
 
+POST users/_doc
+{"name":"user2","age":12}
+
+POST users/_doc
+{"name":"user2","age":13}
+
+POST users/_count
+
+POST users/_search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "age": "desc"
+    },
+    {
+      "_id": "asc"
+    }
+  ]
+}
+
+POST users/_search
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  },
+  "search_after": [
+    13,
+    "ksP-0GwB1iLVURyqSbMH"
+  ],
+  "sort": [
+    {
+      "age": "desc"
+    },
+    {
+      "_id": "asc"
+    }
+  ]
+}
 
 
+#Scroll API
+DELETE users
+POST users/_doc
+{"name":"user1","age":10}
 
+POST users/_doc
+{"name":"user2","age":20}
+
+POST users/_doc
+{"name":"user3","age":30}
+
+POST users/_doc
+{"name":"user4","age":40}
+
+
+POST /users/_search?scroll=1m
+{
+  "size": 1,
+  "query": {
+    "match_all": {}
+  }
+}
+
+
+POST users/_doc
+{"name":"user5","age":50}
+POST /_search/scroll
+{
+  "scroll": "1m",
+  "scroll_id": "DXF1ZXJ5QW5kRmV0Y2gBAAAAAAAABBAWa3M1NGZ1TGtRanFzd25DQVhGZUE4Zw=="
+}
+
+
+DELETE products
+PUT products
+PUT products/_doc/1
+{
+  "title": "iphone",
+  "count": 100
+}
+
+GET products/_doc/1
+
+PUT products/_doc/1?if_seq_no=0&if_primary_term=1
+{
+  "title": "iphone",
+  "count": 100
+}
+
+PUT products/_doc/1?version=30002&version_type=external
+{
+  "title":"iphone",
+  "count":100
+}
 
 
 
