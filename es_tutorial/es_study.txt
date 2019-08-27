@@ -2408,6 +2408,244 @@ POST comments/_search
 
 
 
+#单字段排序
+POST /kibana_sample_data_ecommerce/_search
+{
+  "size": 5,
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "order_date": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+#多字段排序
+POST /kibana_sample_data_ecommerce/_search
+{
+  "size": 5,
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+    {
+      "order_date": {
+        "order": "desc"
+      }
+    },
+    {
+      "_doc": {
+        "order": "asc"
+      }
+    },
+    {
+      "_score": {
+        "order": "desc"
+      }
+    }
+  ]
+}
+
+
+GET kibana_sample_data_ecommerce/_mapping
+
+#对 text 字段进行排序。默认会报错，需打开fielddata
+POST /kibana_sample_data_ecommerce/_search
+{
+  "size": 5,
+  "query": {
+    "match_all": {
+
+    }
+  },
+  "sort": [
+    {"customer_full_name": {"order": "desc"}}
+  ]
+}
+
+#打开 text的 fielddata
+PUT kibana_sample_data_ecommerce/_mapping
+{
+  "properties": {
+    "customer_full_name" : {
+          "type" : "text",
+          "fielddata": true,
+          "fields" : {
+            "keyword" : {
+              "type" : "keyword",
+              "ignore_above" : 256
+            }
+          }
+        }
+  }
+}
+
+
+#关闭 keyword的 doc values
+PUT test_keyword
+PUT test_keyword/_mapping
+{
+  "properties": {
+    "user_name":{
+      "type": "keyword",
+      "doc_values":false
+    }
+  }
+}
+
+
+DELETE test_keyword
+
+PUT test_doc_values
+PUT test_doc_values/_mapping
+{
+  "properties": {
+    "username":{
+      "type": "keyword",
+      "doc_values": false
+    },
+    "hobby":{
+      "type": "keyword"
+    }
+  }
+}
+
+PUT test_doc_values/_doc/1
+{
+  "username": "alfred",
+  "hobby": "basketball"
+}
+
+GET test_doc_values/_search
+{
+  "sort": "username"
+}
+
+GET test_doc_values/_search
+{
+  "sort": "hobby"
+}
+
+GET test_doc_values/_search
+{
+  "docvalue_fields": [
+    "username.keyword"
+  ]
+}
+
+
+DELETE test_text
+DELETE test_text2
+DELETE test_doc_values
+
+
+DELETE temp_users
+PUT temp_users
+PUT temp_users/_mapping
+{
+  "properties": {
+    "name": {
+      "type": "text",
+      "fielddata": true
+    },
+    "desc": {
+      "type": "text",
+      "fielddata": true
+    }
+  }
+}
+
+POST temp_users/_doc
+{
+  "name": "Jack",
+  "desc": "Jack is a good boy!",
+  "age": 10
+}
+
+GET temp_users/_mapping
+
+#打开fielddata 后，查看 docvalue_fields数据
+POST temp_users/_search
+{
+  "docvalue_fields": [
+    "name",
+    "desc"
+  ]
+}
+
+#查看整型字段的docvalues
+POST temp_users/_search
+{
+  "docvalue_fields": [
+    "age"
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
