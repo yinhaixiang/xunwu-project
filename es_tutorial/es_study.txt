@@ -3614,24 +3614,352 @@ POST my_movies/_search
 
 
 
+DELETE my_blogs
+
+# 设定 Parent/Child Mapping
+PUT my_blogs
+{
+  "settings": {
+    "number_of_shards": 2
+  },
+  "mappings": {
+    "properties": {
+      "blog_comments_relation": {
+        "type": "join",
+        "relations": {
+          "blog": "comment"
+        }
+      },
+      "content": {
+        "type": "text"
+      },
+      "title": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+
+#索引父文档
+PUT my_blogs/_doc/blog1
+{
+  "title": "Learning Elasticsearch",
+  "content": "learning ELK @ geektime",
+  "blog_comments_relation": {
+    "name": "blog"
+  }
+}
+
+
+#索引父文档
+PUT my_blogs/_doc/blog2
+{
+  "title": "Learning Hadoop",
+  "content": "learning Hadoop",
+  "blog_comments_relation": {
+    "name": "blog"
+  }
+}
+
+
+#索引子文档
+PUT my_blogs/_doc/comment1?routing=blog1
+{
+  "comment": "I am learning ELK",
+  "username": "Jack",
+  "blog_comments_relation": {
+    "name": "comment",
+    "parent": "blog1"
+  }
+}
+
+#索引子文档
+PUT my_blogs/_doc/comment2?routing=blog2
+{
+  "comment": "I like Hadoop!!!!!",
+  "username": "Jack",
+  "blog_comments_relation": {
+    "name": "comment",
+    "parent": "blog2"
+  }
+}
+
+#索引子文档
+PUT my_blogs/_doc/comment3?routing=blog2
+{
+  "comment": "Hello Hadoop",
+  "username": "Bob",
+  "blog_comments_relation": {
+    "name": "comment",
+    "parent": "blog2"
+  }
+}
+
+# 查询所有文档
+POST my_blogs/_search
+{}
+
+#根据父文档ID查看
+GET my_blogs/_doc/blog2
+
+
+# Parent Id 查询
+POST my_blogs/_search
+{
+  "query": {
+    "parent_id": {
+      "type": "comment",
+      "id": "blog2"
+    }
+  }
+}
+
+
+# Has Child 查询,返回父文档
+POST my_blogs/_search
+{
+  "query": {
+    "has_child": {
+      "type": "comment",
+      "query": {
+        "match": {
+          "username": "Jack"
+        }
+      }
+    }
+  }
+}
+
+# Has Parent 查询，返回相关的子文档
+POST my_blogs/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "blog",
+      "query": {
+        "match": {
+          "title": "Learning Hadoop"
+        }
+      }
+    }
+  }
+}
+
+
+#通过ID ，访问子文档
+GET my_blogs/_doc/comment3
+
+#通过ID和routing ，访问子文档
+GET my_blogs/_doc/comment3?routing=blog2
+
+#更新子文档
+PUT my_blogs/_doc/comment3?routing=blog2
+{
+  "comment": "Hello Hadoop??",
+  "blog_comments_relation": {
+    "name": "comment",
+    "parent": "blog2"
+  }
+}
+
+
+DELETE blogs
+
+# 写入文档
+PUT blogs/_doc/1
+{
+  "content": "Hadoop is cool",
+  "keyword": "hadoop"
+}
+
+# 查看 Mapping
+GET blogs/_mapping
+
+# 修改 Mapping，增加子字段，使用英文分词器
+PUT blogs/_mapping
+{
+  "properties": {
+    "content": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    }
+  }
+}
+
+# 写入文档
+PUT blogs/_doc/2
+{
+  "content": "Elasticsearch rocks",
+  "keyword": "elasticsearch"
+}
+
+# 查询新写入文档
+POST blogs/_search
+{
+  "query": {
+    "match": {
+      "content.english": "Elasticsearch"
+    }
+  }
+}
+
+
+# 查询 Mapping 变更前写入的文档
+POST blogs/_search
+{
+  "query": {
+    "match": {
+      "content.english": "Hadoop"
+    }
+  }
+}
+
+
+# Update所有文档
+POST blogs/_update_by_query
+{}
+
+# 查询之前写入的文档
+POST blogs/_search
+{
+  "query": {
+    "match": {
+      "content.english": "Hadoop"
+    }
+  }
+}
+
+
+# 查询
+GET blogs/_mapping
+
+PUT blogs/_mapping
+{
+  "properties": {
+    "content": {
+      "type": "text",
+      "fields": {
+        "english": {
+          "type": "text",
+          "analyzer": "english"
+        }
+      }
+    },
+    "keyword": {
+      "type": "keyword"
+    }
+  }
+}
+
+DELETE blogs_fix
+
+# 创建新的索引并且设定新的Mapping
+PUT blogs_fix
+{
+  "mappings": {
+    "properties": {
+      "content": {
+        "type": "text",
+        "fields": {
+          "english": {
+            "type": "text",
+            "analyzer": "english"
+          }
+        }
+      },
+      "keyword": {
+        "type": "keyword"
+      }
+    }
+  }
+}
+
+# Reindx API
+POST _reindex
+{
+  "source": {
+    "index": "blogs"
+  },
+  "dest": {
+    "index": "blogs_fix"
+  }
+}
+
+GET  blogs_fix/_doc/1
+
+# 测试 Term Aggregation
+POST blogs_fix/_search
+{
+  "size": 0,
+  "aggs": {
+    "blog_keyword": {
+      "terms": {
+        "field": "keyword"
+      }
+    }
+  }
+}
 
 
 
+# 将version_type设置为internal则Elasticsearch强制性的将文档转储到目标中，覆盖具有相同类型和ID的任何内容
+POST _reindex
+{
+  "source": {
+    "index": "blogs"
+  },
+  "dest": {
+    "index": "blogs_fix",
+    "version_type": "internal"
+  }
+}
+
+# 文档版本号增加
+GET  blogs_fix/_doc/1
+
+# 将version_type设置为external将导致Elasticsearch从源文件中保留版本，创建缺失的所有文档，并更新在目标索引中比源索引中版本更老的所有文档
+POST _reindex
+{
+  "source": {
+    "index": "blogs"
+  },
+  "dest": {
+    "index": "blogs_fix",
+    "version_type": "external"
+  }
+}
+
+# 默认情况下，版本冲突将中止_reindex进程，但可以通过请求体设置"conflict":"proceed"来在冲突时进行计数
+POST _reindex
+{
+  "source": {
+    "index": "blogs"
+  },
+  "dest": {
+    "index": "blogs_fix",
+    "version_type": "external"
+  },
+  "conflicts": "proceed"
+}
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+# 设置op_type为create将导致_reindex仅在目标索引中创建缺少的文档。所有存在的文档将导致版本冲突
+POST _reindex
+{
+  "source": {
+    "index": "blogs"
+  },
+  "dest": {
+    "index": "blogs_fix",
+    "op_type": "create"
+  }
+}
 
 
 
