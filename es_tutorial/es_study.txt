@@ -4492,6 +4492,15 @@ POST test/_search
 
 
 
+PUT logs-2019-01-01
+{
+  "settings": {
+    "number_of_shards": 2,
+    "number_of_replicas": 0,
+    "index.routing.allocation.require.my_node_type": "hot"
+  }
+}
+
 
 
 
